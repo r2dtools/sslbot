@@ -6,28 +6,37 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+	"github.com/unknwon/com"
 )
 
 const (
-	defaultPort       = 60150
-	defaultCaServer   = "https://acme-v02.api.letsencrypt.org/directory"
-	defaultVarDirPath = "/usr/local/r2dtools/sslbot/var"
+	defaultPort               = 60150
+	defaultCaServer           = "https://acme-v02.api.letsencrypt.org/directory"
+	defaultVarDir             = "/usr/local/r2dtools/sslbot/var"
+	defaultCertBotDataDir     = "/etc/letsencrypt/live"
+	defaultCertBotBin         = "certbot"
+	defaultNginxRoot          = "/etc/nginx"
+	defaultNginxAcmeCommonDir = "/var/www/html/"
 )
 
 var isDevMode = true
 var Version string
 
 type Config struct {
-	LogFile        string
-	Port           int
-	Token          string
-	IsDevMode      bool
-	Version        string
-	LegoBinPath    string
-	CaServer       string
-	ConfigFilePath string
-	VarDirPath     string
-	rootPath       string
+	LogFile            string
+	Port               int
+	Token              string
+	IsDevMode          bool
+	Version            string
+	LegoBin            string
+	CaServer           string
+	ConfigFilePath     string
+	VarDir             string
+	CertBotEnabled     bool
+	CertBotBin         string
+	CertBotWokrDir     string
+	NginxAcmeCommonDir string
+	rootPath           string
 }
 
 func GetConfig() (*Config, error) {
@@ -56,13 +65,6 @@ func GetConfig() (*Config, error) {
 	}
 
 	configFilePath := filepath.Join(rootPath, "config.yaml")
-	configFile, err := os.OpenFile(configFilePath, os.O_RDONLY|os.O_CREATE, 0644)
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer configFile.Close()
 
 	viper.AddConfigPath(filepath.Dir(configFilePath))
 	viper.SetConfigName("config")
@@ -71,12 +73,26 @@ func GetConfig() (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("sslbot")
 
-	viper.SetDefault("port", defaultPort)
-	viper.SetDefault("ca_server", defaultCaServer)
-	viper.SetDefault("var_dir_path", defaultVarDirPath)
+	viper.SetDefault(PortOpt, defaultPort)
+	viper.SetDefault(CaServerOpt, defaultCaServer)
+	viper.SetDefault(VarDirOpt, defaultVarDir)
+	viper.SetDefault(CertBotWorkDirOpt, defaultCertBotDataDir)
+	viper.SetDefault(CertBotBinOpt, defaultCertBotBin)
+	viper.SetDefault(NginxAcmeCommonDirOpt, defaultNginxAcmeCommonDir)
+	viper.SetDefault(NginxRootOpt, defaultNginxRoot)
 
-	if err := viper.ReadConfig(configFile); err != nil {
-		panic(err)
+	if com.IsFile(configFilePath) {
+		configFile, err := os.OpenFile(configFilePath, os.O_RDONLY, 0644)
+
+		if err != nil {
+			panic(err)
+		}
+
+		defer configFile.Close()
+
+		if err := viper.ReadConfig(configFile); err != nil {
+			panic(err)
+		}
 	}
 
 	if Version == "" {
@@ -84,12 +100,12 @@ func GetConfig() (*Config, error) {
 	}
 
 	if isDevMode {
-		viper.Set("var_dir_path", filepath.Join(rootPath, "var"))
+		viper.Set(VarDirOpt, filepath.Join(rootPath, "var"))
 	}
 
 	config := &Config{
 		LogFile:        filepath.Join(rootPath, "sslbot.log"),
-		LegoBinPath:    filepath.Join(rootPath, "lego"),
+		LegoBin:        filepath.Join(rootPath, "lego"),
 		ConfigFilePath: configFilePath,
 		rootPath:       rootPath,
 		IsDevMode:      isDevMode,
@@ -106,7 +122,7 @@ func GetConfig() (*Config, error) {
 }
 
 func (c *Config) GetPathInsideVarDir(path ...string) string {
-	parts := []string{c.VarDirPath}
+	parts := []string{c.VarDir}
 	parts = append(parts, path...)
 
 	return filepath.Join(parts...)
@@ -125,9 +141,29 @@ func (c *Config) ToMap() map[string]string {
 	return options
 }
 
+func CreateConfigFileIfNotExists(config *Config) error {
+	if com.IsFile(config.ConfigFilePath) {
+		return nil
+	}
+
+	file, err := os.Create(config.ConfigFilePath)
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	return nil
+}
+
 func setDynamicParams(c *Config) {
-	c.Port = viper.GetInt("port")
-	c.Token = viper.GetString("token")
-	c.CaServer = viper.GetString("ca_server")
-	c.VarDirPath = viper.GetString("var_dir_path")
+	c.Port = viper.GetInt(PortOpt)
+	c.Token = viper.GetString(TokenOpt)
+	c.CaServer = viper.GetString(CaServerOpt)
+	c.VarDir = viper.GetString(VarDirOpt)
+	c.CertBotEnabled = viper.GetBool(CertBotEnabledOpt)
+	c.CertBotBin = viper.GetString(CertBotBinOpt)
+	c.CertBotWokrDir = viper.GetString(CertBotWorkDirOpt)
+	c.NginxAcmeCommonDir = viper.GetString(NginxAcmeCommonDirOpt)
 }

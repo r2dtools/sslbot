@@ -1,4 +1,0 @@
-ca_server: https://acme-v02.api.letsencrypt.org/directory
-port: 60151
-token: 111ab6bf-1db5-4139-aff4-b25ffbf2a869
-var_dir_path: /usr/local/r2dtools/sslbot/var

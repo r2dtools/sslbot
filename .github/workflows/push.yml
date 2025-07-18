@@ -1,8 +1,5 @@
 name: push
-on:
-  push:
-    branches-ignore:
-      - master
+on: push
 jobs:
   build:
     name: Build
@@ -18,7 +15,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install dependencies
-        run: go install ./...
+        run: |
+          go mod download
+          go install ./...
 
       - name: Build image for tests
         run: make build_test

@@ -16,7 +16,7 @@ build: build_agent build_lego
 	cp LICENSE build/
 
 build_test:
-	docker build -t sslbot-tests . 
+	docker build -f Dockerfile.nginx -t sslbot-tests . 
 clean:
 	cd build; \
 	rm -rf config; \
