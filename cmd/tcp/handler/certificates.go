@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"sync"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/r2dtools/agentintegration"
@@ -18,13 +19,14 @@ import (
 	"github.com/r2dtools/sslbot/internal/webserver/reverter"
 )
 
-type Handler struct {
+type CertificatesHandler struct {
 	certManager *certificates.CertificateManager
 	logger      logger.Logger
 	config      *config.Config
+	mx          *sync.Mutex
 }
 
-func (h *Handler) Handle(request router.Request) (interface{}, error) {
+func (h *CertificatesHandler) Handle(request router.Request) (interface{}, error) {
 	var response any
 	var err error
 
@@ -56,7 +58,7 @@ func (h *Handler) Handle(request router.Request) (interface{}, error) {
 	return response, err
 }
 
-func (h *Handler) issueCertificateToDomain(data any) (*agentintegration.Certificate, error) {
+func (h *CertificatesHandler) issueCertificateToDomain(data any) (*agentintegration.Certificate, error) {
 	var request agentintegration.CertificateIssueRequestData
 	err := mapstructure.Decode(data, &request)
 
@@ -73,7 +75,7 @@ func (h *Handler) issueCertificateToDomain(data any) (*agentintegration.Certific
 	return contract.ConvertCertificate(cert), nil
 }
 
-func (h *Handler) uploadCertificateToDomain(data any) (*agentintegration.Certificate, error) {
+func (h *CertificatesHandler) uploadCertificateToDomain(data any) (*agentintegration.Certificate, error) {
 	var request agentintegration.CertificateUploadRequestData
 	err := mapstructure.Decode(data, &request)
 
@@ -94,7 +96,7 @@ func (h *Handler) uploadCertificateToDomain(data any) (*agentintegration.Certifi
 	return contract.ConvertCertificate(cert), nil
 }
 
-func (h *Handler) storageCertificates() (*agentintegration.CertificatesResponseData, error) {
+func (h *CertificatesHandler) storageCertificates() (*agentintegration.CertificatesResponseData, error) {
 	certItems, err := h.certManager.GetStorageCertificates()
 
 	if err != nil {
@@ -110,7 +112,7 @@ func (h *Handler) storageCertificates() (*agentintegration.CertificatesResponseD
 	return &agentintegration.CertificatesResponseData{Certificates: certsMap}, nil
 }
 
-func (h *Handler) storageCertData(data any) (*agentintegration.Certificate, error) {
+func (h *CertificatesHandler) storageCertData(data any) (*agentintegration.Certificate, error) {
 	var request agentintegration.CertificateInfoRequestData
 	err := mapstructure.Decode(data, &request)
 
@@ -127,7 +129,7 @@ func (h *Handler) storageCertData(data any) (*agentintegration.Certificate, erro
 	return contract.ConvertCertificate(cert), nil
 }
 
-func (h *Handler) uploadCertToStorage(data any) (*agentintegration.Certificate, error) {
+func (h *CertificatesHandler) uploadCertToStorage(data any) (*agentintegration.Certificate, error) {
 	var request agentintegration.CertificateUploadRequestData
 	err := mapstructure.Decode(data, &request)
 
@@ -154,7 +156,7 @@ func (h *Handler) uploadCertToStorage(data any) (*agentintegration.Certificate, 
 	return contract.ConvertCertificate(cert), nil
 }
 
-func (h *Handler) removeCertFromStorage(data any) error {
+func (h *CertificatesHandler) removeCertFromStorage(data any) error {
 	var request agentintegration.CertificateRemoveRequestData
 	err := mapstructure.Decode(data, &request)
 
@@ -165,7 +167,7 @@ func (h *Handler) removeCertFromStorage(data any) error {
 	return h.certManager.RemoveStorageCertificate(request.CertName, request.StorageType)
 }
 
-func (h *Handler) downloadCertFromStorage(data any) (*agentintegration.CertificateDownloadResponseData, error) {
+func (h *CertificatesHandler) downloadCertFromStorage(data any) (*agentintegration.CertificateDownloadResponseData, error) {
 	var request agentintegration.CertificateRemoveRequestData
 	err := mapstructure.Decode(data, &request)
 
@@ -186,7 +188,7 @@ func (h *Handler) downloadCertFromStorage(data any) (*agentintegration.Certifica
 	return &certDownloadResponse, nil
 }
 
-func (h *Handler) assignCertificateToDomain(data any) (*agentintegration.Certificate, error) {
+func (h *CertificatesHandler) assignCertificateToDomain(data any) (*agentintegration.Certificate, error) {
 	var request agentintegration.CertificateAssignRequestData
 	err := mapstructure.Decode(data, &request)
 
@@ -203,7 +205,7 @@ func (h *Handler) assignCertificateToDomain(data any) (*agentintegration.Certifi
 	return contract.ConvertCertificate(cert), nil
 }
 
-func (h *Handler) commonDirStatus(data any) (*agentintegration.CommonDirStatusResponseData, error) {
+func (h *CertificatesHandler) commonDirStatus(data any) (*agentintegration.CommonDirStatusResponseData, error) {
 	var requestData agentintegration.CommonDirChangeStatusRequestData
 	err := mapstructure.Decode(data, &requestData)
 
@@ -229,7 +231,7 @@ func (h *Handler) commonDirStatus(data any) (*agentintegration.CommonDirStatusRe
 	return &agentintegration.CommonDirStatusResponseData{Status: status.Enabled}, nil
 }
 
-func (h *Handler) changeCommonDirStatus(data any) error {
+func (h *CertificatesHandler) changeCommonDirStatus(data any) error {
 	var requestData agentintegration.CommonDirChangeStatusRequestData
 	err := mapstructure.Decode(data, &requestData)
 
@@ -250,7 +252,7 @@ func (h *Handler) changeCommonDirStatus(data any) error {
 		return err
 	}
 
-	commonDirCommand, err := commondir.CreateCommonDirChangeCommand(wServer, sReverter, h.logger, options)
+	commonDirCommand, err := commondir.CreateCommonDirChangeCommand(h.config, wServer, sReverter, h.logger, h.mx)
 
 	if err != nil {
 		return err
@@ -265,21 +267,23 @@ func (h *Handler) changeCommonDirStatus(data any) error {
 	return err
 }
 
-func GetHandler(config *config.Config, logger logger.Logger) (router.HandlerInterface, error) {
+func CreateCertificatesHandler(config *config.Config, logger logger.Logger, mx *sync.Mutex) (router.HandlerInterface, error) {
 	certManager, err := certificates.CreateCertificateManager(
 		config,
 		webserver.GetWebServer,
 		reverter.CreateReverter,
 		logger,
+		mx,
 	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &Handler{
+	return &CertificatesHandler{
 		logger:      logger,
 		certManager: certManager,
 		config:      config,
+		mx:          mx,
 	}, nil
 }

@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"slices"
+	"sync"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/certificates/commondir"
@@ -60,7 +61,7 @@ var CommonDirCmd = &cobra.Command{
 			return err
 		}
 
-		commonDirCommand, err := commondir.CreateCommonDirChangeCommand(webServer, sReverter, log, config.ToMap())
+		commonDirCommand, err := commondir.CreateCommonDirChangeCommand(config, webServer, sReverter, log, &sync.Mutex{})
 
 		if err != nil {
 			return err

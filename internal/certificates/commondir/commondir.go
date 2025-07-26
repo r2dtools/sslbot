@@ -2,6 +2,7 @@ package commondir
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/logger"
@@ -33,20 +34,20 @@ func CreateCommonDirStatusQuery(webServer webserver.WebServer) (*NginxCommonDirQ
 }
 
 func CreateCommonDirChangeCommand(
+	config *config.Config,
 	webServer webserver.WebServer,
 	reverter reverter.Reverter,
 	logger logger.Logger,
-	options map[string]string,
+	mx *sync.Mutex,
 ) (*NginxCommonDirChangeCommand, error) {
-	nginxCommonDir := options[config.NginxAcmeCommonDirOpt]
-
 	switch w := webServer.(type) {
 	case *webserver.NginxWebServer:
 		return &NginxCommonDirChangeCommand{
 			logger:    logger,
 			webServer: w,
 			reverter:  reverter,
-			commonDir: nginxCommonDir,
+			commonDir: config.NginxAcmeCommonDir,
+			mx:        mx,
 		}, nil
 	default:
 		return nil, fmt.Errorf("webserver %s is not supported", webServer.GetCode())

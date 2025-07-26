@@ -2,6 +2,7 @@ package certificates
 
 import (
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/r2dtools/sslbot/config"
@@ -162,6 +163,7 @@ func createCertManager(
 			return sReverter, nil
 		},
 		log,
+		&sync.Mutex{},
 	)
 	assert.Nil(t, err)
 

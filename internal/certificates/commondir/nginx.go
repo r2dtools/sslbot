@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/r2dtools/gonginxconf/config"
 	"github.com/r2dtools/sslbot/internal/logger"
@@ -50,9 +51,13 @@ type NginxCommonDirChangeCommand struct {
 	reverter  reverter.Reverter
 	logger    logger.Logger
 	commonDir string
+	mx        *sync.Mutex
 }
 
 func (c *NginxCommonDirChangeCommand) EnableCommonDir(serverName string) error {
+	c.mx.Lock()
+	defer c.mx.Unlock()
+
 	wConfig := c.webServer.Config
 	serverBlock := findServerBlock(wConfig, serverName)
 
@@ -112,6 +117,9 @@ func (c *NginxCommonDirChangeCommand) EnableCommonDir(serverName string) error {
 }
 
 func (c *NginxCommonDirChangeCommand) DisableCommonDir(serverName string) error {
+	c.mx.Lock()
+	defer c.mx.Unlock()
+
 	wConfig := c.webServer.Config
 	serverBlock := findServerBlock(wConfig, serverName)
 

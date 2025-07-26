@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"slices"
+	"sync"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/certificates"
@@ -54,6 +55,7 @@ var IssueCertificateCmd = &cobra.Command{
 			webserver.GetWebServer,
 			reverter.CreateReverter,
 			log,
+			&sync.Mutex{},
 		)
 
 		if err != nil {

@@ -2,6 +2,7 @@ package commondir
 
 import (
 	"strings"
+	"sync"
 	"testing"
 
 	nginxconfig "github.com/r2dtools/gonginxconf/config"
@@ -69,7 +70,7 @@ func getNginxCommonDir(t *testing.T) (*NginxCommonDirChangeCommand, *NginxCommon
 	rv, err := reverter.CreateReverter(nginxWebServer, &logger.TestLogger{T: t})
 	assert.Nil(t, err)
 
-	command, err := CreateCommonDirChangeCommand(nginxWebServer, rv, &logger.TestLogger{T: t}, options)
+	command, err := CreateCommonDirChangeCommand(config, nginxWebServer, rv, &logger.TestLogger{T: t}, &sync.Mutex{})
 	assert.Nil(t, err)
 
 	query, err := CreateCommonDirStatusQuery(nginxWebServer)

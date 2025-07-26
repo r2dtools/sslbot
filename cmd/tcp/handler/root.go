@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/r2dtools/agentintegration"
@@ -18,12 +19,13 @@ import (
 )
 
 type MainHandler struct {
-	Config *config.Config
-	Logger logger.Logger
+	config *config.Config
+	logger logger.Logger
+	mx     *sync.Mutex
 }
 
 func (h *MainHandler) Handle(request router.Request) (any, error) {
-	var response interface{}
+	var response any
 	var err error
 
 	switch action := request.GetAction(); action {
@@ -46,9 +48,11 @@ func (h *MainHandler) Handle(request router.Request) (any, error) {
 
 func (h *MainHandler) refresh() (*agentintegration.ServerData, error) {
 	info, err := host.Info()
+
 	if err != nil {
 		return nil, fmt.Errorf("could not get system info: %v", err)
 	}
+
 	var serverData agentintegration.ServerData
 	serverData.BootTime = info.BootTime
 	serverData.Uptime = info.Uptime
@@ -60,7 +64,7 @@ func (h *MainHandler) refresh() (*agentintegration.ServerData, error) {
 	serverData.PlatformVersion = info.PlatformVersion
 	serverData.Os = info.OS
 
-	serverData.AgentVersion = h.Config.Version
+	serverData.AgentVersion = h.config.Version
 
 	return &serverData, nil
 }
@@ -68,20 +72,20 @@ func (h *MainHandler) refresh() (*agentintegration.ServerData, error) {
 func (h *MainHandler) getVhosts() ([]agentintegration.VirtualHost, error) {
 	webServerCodes := webserver.GetSupportedWebServers()
 	var vhosts []agentintegration.VirtualHost
-	options := h.Config.ToMap()
+	options := h.config.ToMap()
 
 	for _, webServerCode := range webServerCodes {
 		webserver, err := webserver.GetWebServer(webServerCode, options)
 
 		if err != nil {
-			h.Logger.Error(err.Error())
+			h.logger.Error(err.Error())
 			continue
 		}
 
 		wVhosts, err := webserver.GetVhosts()
 
 		if err != nil {
-			h.Logger.Error(err.Error())
+			h.logger.Error(err.Error())
 			continue
 		}
 
@@ -92,7 +96,7 @@ func (h *MainHandler) getVhosts() ([]agentintegration.VirtualHost, error) {
 }
 
 func (h *MainHandler) getVhostCertificate(data any) (*agentintegration.Certificate, error) {
-	mData, ok := data.(map[string]interface{})
+	mData, ok := data.(map[string]any)
 
 	if !ok {
 		return nil, errors.New("invalid request data format")
@@ -114,7 +118,7 @@ func (h *MainHandler) getVhostCertificate(data any) (*agentintegration.Certifica
 
 	if err != nil {
 		message := "could not get vhost '%s' certificate: %v"
-		h.Logger.Info(message, vhostName, err)
+		h.logger.Info(message, vhostName, err)
 
 		return nil, fmt.Errorf(message, vhostName, err)
 	}
@@ -122,7 +126,7 @@ func (h *MainHandler) getVhostCertificate(data any) (*agentintegration.Certifica
 	return contract.ConvertCertificate(cert), nil
 }
 
-func (h *MainHandler) getVhostConfig(data interface{}) (agentintegration.VirtualHostConfigResponseData, error) {
+func (h *MainHandler) getVhostConfig(data any) (agentintegration.VirtualHostConfigResponseData, error) {
 	var response agentintegration.VirtualHostConfigResponseData
 	var request agentintegration.VirtualHostConfigRequestData
 
@@ -132,7 +136,7 @@ func (h *MainHandler) getVhostConfig(data interface{}) (agentintegration.Virtual
 		return response, fmt.Errorf("invalid vhodt config request data: %v", err)
 	}
 
-	options := h.Config.ToMap()
+	options := h.config.ToMap()
 	wServer, err := webserver.GetWebServer(request.WebServer, options)
 
 	if err != nil {
@@ -167,6 +171,9 @@ func (h *MainHandler) getVhostConfig(data interface{}) (agentintegration.Virtual
 }
 
 func (h *MainHandler) reloadWebServer(data any) error {
+	h.mx.Lock()
+	defer h.mx.Unlock()
+
 	var request agentintegration.ReloadWebServerRequestData
 
 	err := mapstructure.Decode(data, &request)
@@ -175,8 +182,7 @@ func (h *MainHandler) reloadWebServer(data any) error {
 		return fmt.Errorf("invalid vhodt config request data: %v", err)
 	}
 
-	options := h.Config.ToMap()
-	wServer, err := webserver.GetWebServer(request.WebServer, options)
+	wServer, err := webserver.GetWebServer(request.WebServer, h.config.ToMap())
 
 	if err != nil {
 		return err
@@ -189,4 +195,12 @@ func (h *MainHandler) reloadWebServer(data any) error {
 	}
 
 	return p.Reload()
+}
+
+func CreateMainHandler(config *config.Config, logger logger.Logger, mx *sync.Mutex) *MainHandler {
+	return &MainHandler{
+		config: config,
+		logger: logger,
+		mx:     mx,
+	}
 }

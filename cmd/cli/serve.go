@@ -1,9 +1,10 @@
 package cli
 
 import (
+	"sync"
+
 	"github.com/r2dtools/sslbot/cmd/tcp"
 	"github.com/r2dtools/sslbot/cmd/tcp/handler"
-	certificates "github.com/r2dtools/sslbot/cmd/tcp/handler"
 	"github.com/r2dtools/sslbot/cmd/tcp/router"
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/logger"
@@ -26,17 +27,16 @@ var ServeCmd = &cobra.Command{
 			return err
 		}
 
-		certificatesHandler, err := certificates.GetHandler(config, logger)
+		mx := &sync.Mutex{}
+		mainHandler := handler.CreateMainHandler(config, logger, mx)
+		certificatesHandler, err := handler.CreateCertificatesHandler(config, logger, mx)
 
 		if err != nil {
 			return err
 		}
 
 		router := router.Router{}
-		router.RegisterHandler("main", &handler.MainHandler{
-			Config: config,
-			Logger: logger,
-		})
+		router.RegisterHandler("main", mainHandler)
 		router.RegisterHandler("certificates", certificatesHandler)
 
 		server := &tcp.Server{
@@ -46,10 +46,6 @@ var ServeCmd = &cobra.Command{
 			Config: config,
 		}
 
-		if err := server.Serve(); err != nil {
-			return err
-		}
-
-		return nil
+		return server.Serve()
 	},
 }

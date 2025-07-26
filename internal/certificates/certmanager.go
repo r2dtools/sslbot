@@ -269,6 +269,7 @@ func CreateCertificateManager(
 	webServerFactory webServerFactory,
 	reverterFactory reverterFactory,
 	logger logger.Logger,
+	mx *sync.Mutex,
 ) (*CertificateManager, error) {
 	certStorages := map[CertStorageType]CertStorage{}
 	acmeClient, err := client.CreateAcmeClient(config, logger)
@@ -302,7 +303,7 @@ func CreateCertificateManager(
 	}
 
 	certManager := &CertificateManager{
-		mx:              &sync.Mutex{},
+		mx:              mx,
 		logger:          logger,
 		config:          config,
 		acmeClient:      acmeClient,
