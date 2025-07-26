@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/dto"
@@ -17,12 +18,16 @@ import (
 var ErrStorageDirNotExists = errors.New("storage directory not exists")
 
 type CertBotStorage struct {
+	*sync.RWMutex
 	bin    string
 	path   string
 	logger logger.Logger
 }
 
 func (s *CertBotStorage) RemoveCertificate(certName string) error {
+	s.Lock()
+	defer s.Unlock()
+
 	params := []string{"delete", "--cert-name " + certName}
 	cmd := exec.Command(s.bin, params...)
 	err := cmd.Run()
@@ -35,6 +40,9 @@ func (s *CertBotStorage) RemoveCertificate(certName string) error {
 }
 
 func (s *CertBotStorage) GetCertificate(certName string) (*dto.Certificate, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certPath, _, err := s.GetCertificatePath(certName)
 
 	if err != nil {
@@ -45,6 +53,9 @@ func (s *CertBotStorage) GetCertificate(certName string) (*dto.Certificate, erro
 }
 
 func (s *CertBotStorage) GetCertificateAsString(certName string) (certPath string, certContent string, err error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certPath = s.getCertificatePath(certName)
 	certContentBytes, err := os.ReadFile(certPath)
 
@@ -58,6 +69,9 @@ func (s *CertBotStorage) GetCertificateAsString(certName string) (certPath strin
 }
 
 func (s *CertBotStorage) GetCertificates() (map[string]*dto.Certificate, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certNameMap, err := s.getStorageCertNameMap()
 
 	if err != nil {
@@ -83,18 +97,6 @@ func (s *CertBotStorage) GetCertificates() (map[string]*dto.Certificate, error) 
 }
 
 func (s *CertBotStorage) GetCertificatePath(certName string) (certPath string, keyPath string, err error) {
-	certNameMap, err := s.getStorageCertNameMap()
-
-	if err != nil {
-		return "", "", err
-	}
-
-	_, ok := certNameMap[certName]
-
-	if !ok {
-		return "", "", fmt.Errorf("could not find certificate '%s'", certName)
-	}
-
 	certPath = s.getCertificatePath(certName)
 	keyPath = s.getPrivateKeyPath(certName)
 
@@ -136,5 +138,10 @@ func CreateCertStorage(config *config.Config, logger logger.Logger) (*CertBotSto
 		return nil, ErrStorageDirNotExists
 	}
 
-	return &CertBotStorage{path: workDir, bin: config.CertBotBin, logger: logger}, nil
+	return &CertBotStorage{
+		RWMutex: &sync.RWMutex{},
+		path:    workDir,
+		bin:     config.CertBotBin,
+		logger:  logger,
+	}, nil
 }

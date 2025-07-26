@@ -3,6 +3,7 @@ package certificates
 import (
 	"fmt"
 	"path/filepath"
+	"sync"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/certificates/deploy"
@@ -34,6 +35,7 @@ func (d *NilCertificateDeployer) DeployCertificate(
 }
 
 type DefaultCertificateDeployer struct {
+	mx        *sync.Mutex
 	webServer webserver.WebServer
 	reverter  reverter.Reverter
 	logger    logger.Logger
@@ -45,6 +47,9 @@ func (d *DefaultCertificateDeployer) DeployCertificate(
 	keyPath string,
 	preventReload bool,
 ) error {
+	d.mx.Lock()
+	defer d.mx.Unlock()
+
 	vhost, err := d.webServer.GetVhostByName(serverName)
 
 	if err != nil {
@@ -140,6 +145,7 @@ func createCertificateDeployer(
 	webServer webserver.WebServer,
 	reverter reverter.Reverter,
 	logger logger.Logger,
+	mx *sync.Mutex,
 ) CertificateDeployer {
 	if config.CertBotEnabled {
 		// certbot has own deployer
@@ -147,6 +153,7 @@ func createCertificateDeployer(
 	}
 
 	return &DefaultCertificateDeployer{
+		mx:        mx,
 		webServer: webServer,
 		reverter:  reverter,
 		logger:    logger,

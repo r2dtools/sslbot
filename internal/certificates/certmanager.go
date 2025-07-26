@@ -3,6 +3,7 @@ package certificates
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/certificates/acme/client"
@@ -53,6 +54,7 @@ type CertificateManager struct {
 	acmeClient      client.AcmeClient
 	logger          logger.Logger
 	config          *config.Config
+	mx              *sync.Mutex
 }
 
 func (c *CertificateManager) Issue(request request.IssueRequest) (*dto.Certificate, error) {
@@ -69,7 +71,7 @@ func (c *CertificateManager) Issue(request request.IssueRequest) (*dto.Certifica
 		return nil, err
 	}
 
-	certDeployer := createCertificateDeployer(c.config, wServer, sReverter, c.logger)
+	certDeployer := createCertificateDeployer(c.config, wServer, sReverter, c.logger, c.mx)
 	commonDirQuery, err := commondir.CreateCommonDirStatusQuery(wServer)
 
 	if err != nil {
@@ -134,7 +136,7 @@ func (c *CertificateManager) Assign(request request.AssignRequest) (*dto.Certifi
 		return nil, err
 	}
 
-	certDeployer := createCertificateDeployer(c.config, wServer, sReverter, c.logger)
+	certDeployer := createCertificateDeployer(c.config, wServer, sReverter, c.logger, c.mx)
 	err = certDeployer.DeployCertificate(request.ServerName, certPath, keyPath, false)
 
 	if err != nil {
@@ -178,7 +180,7 @@ func (c *CertificateManager) Upload(request request.UploadRequest) (*dto.Certifi
 		return nil, err
 	}
 
-	certDeployer := createCertificateDeployer(c.config, wServer, sReverter, c.logger)
+	certDeployer := createCertificateDeployer(c.config, wServer, sReverter, c.logger, c.mx)
 	err = certDeployer.DeployCertificate(request.ServerName, certPath, certPath, false)
 
 	if err != nil {
@@ -300,6 +302,7 @@ func CreateCertificateManager(
 	}
 
 	certManager := &CertificateManager{
+		mx:              &sync.Mutex{},
 		logger:          logger,
 		config:          config,
 		acmeClient:      acmeClient,

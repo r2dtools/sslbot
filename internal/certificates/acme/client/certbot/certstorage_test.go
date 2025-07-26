@@ -2,6 +2,7 @@ package certbot
 
 import (
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/r2dtools/sslbot/internal/logger"
@@ -47,7 +48,8 @@ func TestGetCertificatePath(t *testing.T) {
 
 func getStorage(t *testing.T) *CertBotStorage {
 	return &CertBotStorage{
-		path:   workDir,
-		logger: &logger.TestLogger{T: t},
+		RWMutex: &sync.RWMutex{},
+		path:    workDir,
+		logger:  &logger.TestLogger{T: t},
 	}
 }

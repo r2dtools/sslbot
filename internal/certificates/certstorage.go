@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/dto"
@@ -14,11 +15,15 @@ import (
 )
 
 type DefaultStorage struct {
+	*sync.RWMutex
 	path   string
 	logger logger.Logger
 }
 
 func (s *DefaultStorage) AddPemCertificate(certName, pemData string) (certPath string, err error) {
+	s.Lock()
+	defer s.Unlock()
+
 	certPath = s.getCertificatePath(certName)
 
 	if err := os.WriteFile(certPath, []byte(pemData), 0644); err != nil {
@@ -29,6 +34,9 @@ func (s *DefaultStorage) AddPemCertificate(certName, pemData string) (certPath s
 }
 
 func (s *DefaultStorage) RemoveCertificate(certName string) error {
+	s.Lock()
+	defer s.Unlock()
+
 	certPath := s.getCertificatePath(certName)
 
 	if com.IsFile(certPath) {
@@ -41,12 +49,18 @@ func (s *DefaultStorage) RemoveCertificate(certName string) error {
 }
 
 func (s *DefaultStorage) GetCertificate(certName string) (*dto.Certificate, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certPath := s.getCertificatePath(certName)
 
 	return utils.GetCertificateFromFile(certPath)
 }
 
 func (s *DefaultStorage) GetCertificateAsString(certName string) (certPath string, certContent string, err error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certPath = s.getCertificatePath(certName)
 	certContentBytes, err := os.ReadFile(certPath)
 
@@ -60,6 +74,9 @@ func (s *DefaultStorage) GetCertificateAsString(certName string) (certPath strin
 }
 
 func (s *DefaultStorage) GetCertificates() (map[string]*dto.Certificate, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certNameMap, err := s.getStorageCertNameMap()
 
 	if err != nil {
@@ -85,18 +102,6 @@ func (s *DefaultStorage) GetCertificates() (map[string]*dto.Certificate, error) 
 }
 
 func (s *DefaultStorage) GetCertificatePath(certName string) (certPath string, keyPath string, err error) {
-	certNameMap, err := s.getStorageCertNameMap()
-
-	if err != nil {
-		return "", "", err
-	}
-
-	_, ok := certNameMap[certName]
-
-	if !ok {
-		return "", "", fmt.Errorf("could not find certificate '%s'", certName)
-	}
-
 	certPath = s.getCertificatePath(certName)
 	keyPath = certPath
 
@@ -144,5 +149,5 @@ func CreateCertStorage(config *config.Config, logger logger.Logger) (*DefaultSto
 		}
 	}
 
-	return &DefaultStorage{path: path, logger: logger}, nil
+	return &DefaultStorage{RWMutex: &sync.RWMutex{}, path: path, logger: logger}, nil
 }

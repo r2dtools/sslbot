@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/dto"
@@ -14,11 +15,15 @@ import (
 )
 
 type LegoStorage struct {
+	*sync.RWMutex
 	path   string
 	logger logger.Logger
 }
 
 func (s *LegoStorage) RemoveCertificate(certName string) error {
+	s.Lock()
+	defer s.Unlock()
+
 	certPemPath := s.getCertificatePath(certName)
 	certCrtPath := s.getFilePathByNameWithExt(certName, "crt")
 	certIssuerCrtPath := s.getFilePathByNameWithExt(certName, "issuer.crt")
@@ -45,6 +50,9 @@ func (s *LegoStorage) RemoveCertificate(certName string) error {
 }
 
 func (s *LegoStorage) GetCertificate(certName string) (*dto.Certificate, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certPath, _, err := s.GetCertificatePath(certName)
 
 	if err != nil {
@@ -55,6 +63,9 @@ func (s *LegoStorage) GetCertificate(certName string) (*dto.Certificate, error) 
 }
 
 func (s *LegoStorage) GetCertificateAsString(certName string) (certPath string, certContent string, err error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certPath = s.getCertificatePath(certName)
 	certContentBytes, err := os.ReadFile(certPath)
 
@@ -68,6 +79,9 @@ func (s *LegoStorage) GetCertificateAsString(certName string) (certPath string, 
 }
 
 func (s *LegoStorage) GetCertificates() (map[string]*dto.Certificate, error) {
+	s.RLock()
+	defer s.RUnlock()
+
 	certNameMap, err := s.getStorageCertNameMap()
 
 	if err != nil {
@@ -93,18 +107,6 @@ func (s *LegoStorage) GetCertificates() (map[string]*dto.Certificate, error) {
 }
 
 func (s *LegoStorage) GetCertificatePath(certName string) (certPath string, keyPath string, err error) {
-	certNameMap, err := s.getStorageCertNameMap()
-
-	if err != nil {
-		return "", "", err
-	}
-
-	_, ok := certNameMap[certName]
-
-	if !ok {
-		return "", "", fmt.Errorf("could not find certificate '%s'", certName)
-	}
-
 	certPath = s.getCertificatePath(certName)
 	keyPath = certPath
 
@@ -156,5 +158,5 @@ func CreateCertStorage(config *config.Config, logger logger.Logger) (*LegoStorag
 		}
 	}
 
-	return &LegoStorage{path: dataPath, logger: logger}, nil
+	return &LegoStorage{RWMutex: &sync.RWMutex{}, path: dataPath, logger: logger}, nil
 }

@@ -35,6 +35,8 @@ func (h *MainHandler) Handle(request router.Request) (any, error) {
 		response, err = h.getVhostCertificate(request.Data)
 	case "getvhostconfig":
 		response, err = h.getVhostConfig(request.Data)
+	case "reloadwebserver":
+		err = h.reloadWebServer(request.Data)
 	default:
 		response, err = nil, fmt.Errorf("invalid action '%s' for module '%s'", action, request.GetModule())
 	}
@@ -162,4 +164,29 @@ func (h *MainHandler) getVhostConfig(data interface{}) (agentintegration.Virtual
 	response.Content = string(content)
 
 	return response, nil
+}
+
+func (h *MainHandler) reloadWebServer(data any) error {
+	var request agentintegration.ReloadWebServerRequestData
+
+	err := mapstructure.Decode(data, &request)
+
+	if err != nil {
+		return fmt.Errorf("invalid vhodt config request data: %v", err)
+	}
+
+	options := h.Config.ToMap()
+	wServer, err := webserver.GetWebServer(request.WebServer, options)
+
+	if err != nil {
+		return err
+	}
+
+	p, err := wServer.GetProcessManager()
+
+	if err != nil {
+		return err
+	}
+
+	return p.Reload()
 }

@@ -3,6 +3,7 @@ package lego
 import (
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/r2dtools/sslbot/internal/logger"
@@ -72,7 +73,8 @@ func TestRemoveCertificate(t *testing.T) {
 
 func getStorage(t *testing.T) *LegoStorage {
 	return &LegoStorage{
-		path:   workDir,
-		logger: &logger.TestLogger{T: t},
+		RWMutex: &sync.RWMutex{},
+		path:    workDir,
+		logger:  &logger.TestLogger{T: t},
 	}
 }
