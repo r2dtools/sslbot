@@ -93,7 +93,7 @@ func (r *DefaultReverter) Rollback() error {
 	// Disable all enabled before sites
 	for _, configToDisable := range r.configsToDisable {
 		if err := r.hostMng.Disable(configToDisable); err != nil {
-			r.logger.Error(fmt.Sprintf("failed to delete symlink to config file %s", configToDisable))
+			r.logger.Error(err.Error())
 		}
 	}
 
@@ -102,7 +102,7 @@ func (r *DefaultReverter) Rollback() error {
 		_, err := os.Stat(fileToDelete)
 
 		if os.IsNotExist(err) {
-			r.logger.Debug(fmt.Sprintf("file '%s' does not exist. Skip its deletion.", fileToDelete))
+			r.logger.Debug(fmt.Sprintf("file '%s' does not exist, skip deletion", fileToDelete))
 			continue
 		}
 

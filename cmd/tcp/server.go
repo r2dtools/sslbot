@@ -51,7 +51,7 @@ func (s *Server) Serve() error {
 	}
 }
 
-func (s *Server) prepareResponse(data interface{}, err error) router.Response {
+func (s *Server) prepareResponse(data any, err error) router.Response {
 	var response router.Response
 
 	if err != nil {
@@ -62,7 +62,7 @@ func (s *Server) prepareResponse(data interface{}, err error) router.Response {
 		response.Data = data
 	}
 
-	s.Logger.Debug("send response: %v", response)
+	s.Logger.Debug("send response: %+v", response)
 
 	return response
 }

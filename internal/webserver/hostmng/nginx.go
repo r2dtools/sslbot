@@ -47,7 +47,7 @@ func (m *NginxHostManager) Disable(enabledConfigFilePath string) error {
 
 	if _, err = os.Lstat(enabledConfigFilePath); err == nil {
 		if err = os.Remove(enabledConfigFilePath); err != nil {
-			return fmt.Errorf("failed to remove config file symlink: %s", enabledConfigFilePath)
+			return fmt.Errorf("failed to remove config file symlink: %s, err: %v", enabledConfigFilePath, err)
 		}
 	}
 

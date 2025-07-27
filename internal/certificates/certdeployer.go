@@ -57,7 +57,7 @@ func (d *DefaultCertificateDeployer) DeployCertificate(
 	}
 
 	if vhost == nil {
-		return fmt.Errorf("could not find virtual host %s", serverName)
+		return fmt.Errorf("virtual host %s not found", serverName)
 	}
 
 	deployer, err := deploy.GetCertificateDeployer(d.webServer, d.reverter, d.logger)
@@ -69,9 +69,7 @@ func (d *DefaultCertificateDeployer) DeployCertificate(
 	sslConfigFilePath, originEnabledConfigFilePath, err := deployer.DeployCertificate(vhost, certPath, keyPath)
 
 	if err != nil {
-		if rErr := d.reverter.Rollback(); rErr != nil {
-			d.logger.Error(fmt.Sprintf("rollback failed on cert deploy: %v", rErr))
-		}
+		d.rollback()
 
 		return err
 	}
@@ -79,19 +77,21 @@ func (d *DefaultCertificateDeployer) DeployCertificate(
 	err = d.enableHost(sslConfigFilePath, originEnabledConfigFilePath)
 
 	if err != nil {
+		d.rollback()
+
 		return err
 	}
 
 	if !preventReload {
 		if err := d.reloadWebServer(); err != nil {
+			d.rollback()
+
 			return err
 		}
 	}
 
 	if err = d.reverter.Commit(); err != nil {
-		if rErr := d.reverter.Rollback(); rErr != nil {
-			d.logger.Error(fmt.Sprintf("failed to commit webserver configuration: %v", rErr))
-		}
+		d.logger.Error(fmt.Sprintf("commit configuration changes failed: %v", err))
 	}
 
 	return nil
@@ -106,17 +106,13 @@ func (d *DefaultCertificateDeployer) enableHost(sslConfigFilePath, originEnabled
 
 	enabledConfigPath, err := hostManager.Enable(sslConfigFilePath, filepath.Dir(originEnabledConfigFilePath))
 
-	if err == nil {
-		d.reverter.AddConfigToDisable(enabledConfigPath)
-
-		return nil
+	if err != nil {
+		return err
 	}
 
-	if rErr := d.reverter.Rollback(); rErr != nil {
-		d.logger.Error(fmt.Sprintf("rollback failed on host enabling: %v", rErr))
-	}
+	d.reverter.AddConfigToDisable(enabledConfigPath)
 
-	return err
+	return nil
 
 }
 
@@ -127,17 +123,13 @@ func (d *DefaultCertificateDeployer) reloadWebServer() error {
 		return err
 	}
 
-	err = processManager.Reload()
+	return processManager.Reload()
+}
 
-	if err == nil {
-		return nil
-	}
-
+func (d *DefaultCertificateDeployer) rollback() {
 	if rErr := d.reverter.Rollback(); rErr != nil {
-		d.logger.Error(fmt.Sprintf("rollback failed on webserver reload: %v", rErr))
+		d.logger.Error("rollback failed: %v", rErr)
 	}
-
-	return err
 }
 
 func createCertificateDeployer(

@@ -29,7 +29,7 @@ func GetNginxProcessManager() (*NginxProcessManager, error) {
 	}
 
 	if nginxProcess == nil {
-		return nil, fmt.Errorf("failed to find nginx process")
+		return nil, fmt.Errorf("nginx process not found")
 	}
 
 	isRunning, err := nginxProcess.IsRunning()

@@ -37,8 +37,6 @@ func (h *CertificatesHandler) Handle(request router.Request) (interface{}, error
 		response, err = h.uploadCertificateToDomain(request.Data)
 	case "storagecertificates":
 		response, err = h.storageCertificates()
-	case "storagecertdata":
-		response, err = h.storageCertData(request.Data)
 	case "storagecertupload":
 		response, err = h.uploadCertToStorage(request.Data)
 	case "storagecertremove":
@@ -110,23 +108,6 @@ func (h *CertificatesHandler) storageCertificates() (*agentintegration.Certifica
 	}
 
 	return &agentintegration.CertificatesResponseData{Certificates: certsMap}, nil
-}
-
-func (h *CertificatesHandler) storageCertData(data any) (*agentintegration.Certificate, error) {
-	var request agentintegration.CertificateInfoRequestData
-	err := mapstructure.Decode(data, &request)
-
-	if err != nil {
-		return nil, fmt.Errorf("invalid request data: %v", err)
-	}
-
-	cert, err := h.certManager.GetStorageCertificate(request.CertName, request.StorageType)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return contract.ConvertCertificate(cert), nil
 }
 
 func (h *CertificatesHandler) uploadCertToStorage(data any) (*agentintegration.Certificate, error) {

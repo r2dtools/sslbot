@@ -19,9 +19,10 @@ func ConvertIssueRequest(r agentintegration.CertificateIssueRequestData) request
 
 func ConvertAssignRequest(r agentintegration.CertificateAssignRequestData) request.AssignRequest {
 	return request.AssignRequest{
-		ServerName: r.ServerName,
-		WebServer:  r.WebServer,
-		CertName:   r.CertName,
+		ServerName:  r.ServerName,
+		WebServer:   r.WebServer,
+		CertName:    r.CertName,
+		StorageType: r.StorageType,
 	}
 }
 
