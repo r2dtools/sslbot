@@ -16,6 +16,12 @@ func ConvertVirtualHost(vhost *dto.VirtualHost) *agentintegration.VirtualHost {
 		})
 	}
 
+	var certificate *agentintegration.Certificate
+
+	if vhost.Certificate != nil {
+		certificate = ConvertCertificate(vhost.Certificate)
+	}
+
 	return &agentintegration.VirtualHost{
 		FilePath:    vhost.FilePath,
 		ServerName:  vhost.ServerName,
@@ -24,7 +30,7 @@ func ConvertVirtualHost(vhost *dto.VirtualHost) *agentintegration.VirtualHost {
 		Aliases:     vhost.Aliases,
 		Ssl:         vhost.Ssl,
 		Addresses:   addresses,
-		Certificate: ConvertCertificate(vhost.Certificate),
+		Certificate: certificate,
 	}
 }
 
