@@ -2,4 +2,5 @@
 var/
 build/
 sslbot.log
+lego
 config.yaml

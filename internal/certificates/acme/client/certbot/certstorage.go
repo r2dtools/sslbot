@@ -15,7 +15,7 @@ import (
 	"github.com/unknwon/com"
 )
 
-var ErrStorageDirNotExists = errors.New("storage directory not exists")
+var ErrStorageDirNotExists = errors.New("certbot storage directory does not exist")
 
 type CertBotStorage struct {
 	*sync.RWMutex
@@ -60,7 +60,7 @@ func (s *CertBotStorage) GetCertificateAsString(certName string) (certPath strin
 	certContentBytes, err := os.ReadFile(certPath)
 
 	if err != nil {
-		return "", "", fmt.Errorf("could not read certificate content: %v", err)
+		return "", "", fmt.Errorf("failed to read certificate content: %v", err)
 	}
 
 	certContent = string(certContentBytes)
@@ -108,7 +108,7 @@ func (s *CertBotStorage) getStorageCertNameMap() (map[string]struct{}, error) {
 	entries, err := os.ReadDir(s.path)
 
 	if err != nil {
-		return nil, fmt.Errorf("could not get certificate list in the storage: %v", err)
+		return nil, fmt.Errorf("failed to get list of repository certificates: %v", err)
 	}
 
 	for _, entry := range entries {

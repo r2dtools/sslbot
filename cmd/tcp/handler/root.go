@@ -29,8 +29,8 @@ func (h *MainHandler) Handle(request router.Request) (any, error) {
 	var err error
 
 	switch action := request.GetAction(); action {
-	case "refresh":
-		response, err = h.refresh()
+	case "getserverdata":
+		response, err = h.getServerData()
 	case "getVhosts":
 		response, err = h.getVhosts()
 	case "getVhostCertificate":
@@ -46,14 +46,14 @@ func (h *MainHandler) Handle(request router.Request) (any, error) {
 	return response, err
 }
 
-func (h *MainHandler) refresh() (*agentintegration.ServerData, error) {
+func (h *MainHandler) getServerData() (agentintegration.ServerData, error) {
+	var serverData agentintegration.ServerData
 	info, err := host.Info()
 
 	if err != nil {
-		return nil, fmt.Errorf("could not get system info: %v", err)
+		return serverData, fmt.Errorf("failed to load server data: %v", err)
 	}
 
-	var serverData agentintegration.ServerData
 	serverData.BootTime = info.BootTime
 	serverData.Uptime = info.Uptime
 	serverData.KernelArch = info.KernelArch
@@ -63,10 +63,19 @@ func (h *MainHandler) refresh() (*agentintegration.ServerData, error) {
 	serverData.PlatformFamily = info.PlatformFamily
 	serverData.PlatformVersion = info.PlatformVersion
 	serverData.Os = info.OS
-
 	serverData.AgentVersion = h.config.Version
 
-	return &serverData, nil
+	certbotStatus := "false"
+
+	if h.config.CertBotEnabled {
+		certbotStatus = "true"
+	}
+
+	serverData.Settings = map[string]string{
+		"certbotstatus": certbotStatus,
+	}
+
+	return serverData, nil
 }
 
 func (h *MainHandler) getVhosts() ([]agentintegration.VirtualHost, error) {
