@@ -7,6 +7,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"github.com/unknwon/com"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -139,6 +140,30 @@ func (c *Config) ToMap() map[string]string {
 	}
 
 	return options
+}
+
+func (c *Config) SetParam(name string, value any) error {
+	data, err := os.ReadFile(c.ConfigFilePath)
+
+	if err != nil {
+		return err
+	}
+
+	confMap := make(map[string]interface{})
+	err = yaml.Unmarshal(data, confMap)
+
+	if err != nil {
+		return err
+	}
+
+	confMap[name] = value
+	data, err = yaml.Marshal(confMap)
+
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(c.ConfigFilePath, data, 0644)
 }
 
 func CreateConfigFileIfNotExists(config *Config) error {

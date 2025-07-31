@@ -1,8 +1,10 @@
 package certbot
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/certificates/acme"
@@ -73,4 +75,27 @@ func CreateCertBot(config *config.Config, logger logger.Logger) (*CertBot, error
 	}
 
 	return &CertBot{bin: config.CertBotBin, storage: storage}, nil
+}
+
+func GetVersion(config *config.Config) (string, error) {
+	cmd := exec.Command(config.CertBotBin, "--version")
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		if len(output) == 0 {
+			return "", err
+		}
+
+		return "", errors.New(string(output))
+	}
+
+	parts := strings.Split(string(output), " ")
+
+	if len(parts) != 2 {
+		return "", errors.New("failed to detect certbot version")
+	}
+
+	version := strings.TrimSpace(parts[1])
+
+	return version, nil
 }

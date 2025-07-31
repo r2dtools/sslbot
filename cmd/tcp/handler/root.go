@@ -12,6 +12,7 @@ import (
 	"github.com/r2dtools/sslbot/cmd/tcp/contract"
 	"github.com/r2dtools/sslbot/cmd/tcp/router"
 	"github.com/r2dtools/sslbot/config"
+	"github.com/r2dtools/sslbot/internal/certificates/acme/client/certbot"
 	"github.com/r2dtools/sslbot/internal/logger"
 	"github.com/r2dtools/sslbot/internal/utils"
 	"github.com/r2dtools/sslbot/internal/webserver"
@@ -39,6 +40,8 @@ func (h *MainHandler) Handle(request router.Request) (any, error) {
 		response, err = h.getVhostConfig(request.Data)
 	case "reloadwebserver":
 		err = h.reloadWebServer(request.Data)
+	case "changecertbotstatus":
+		response, err = h.changeCertbotstatus(request.Data)
 	default:
 		response, err = nil, fmt.Errorf("invalid action '%s' for module '%s'", action, request.GetModule())
 	}
@@ -142,7 +145,7 @@ func (h *MainHandler) getVhostConfig(data any) (agentintegration.VirtualHostConf
 	err := mapstructure.Decode(data, &request)
 
 	if err != nil {
-		return response, fmt.Errorf("invalid vhodt config request data: %v", err)
+		return response, fmt.Errorf("invalid request data: %v", err)
 	}
 
 	options := h.config.ToMap()
@@ -188,7 +191,7 @@ func (h *MainHandler) reloadWebServer(data any) error {
 	err := mapstructure.Decode(data, &request)
 
 	if err != nil {
-		return fmt.Errorf("invalid vhodt config request data: %v", err)
+		return fmt.Errorf("invalid request data: %v", err)
 	}
 
 	wServer, err := webserver.GetWebServer(request.WebServer, h.config.ToMap())
@@ -204,6 +207,40 @@ func (h *MainHandler) reloadWebServer(data any) error {
 	}
 
 	return p.Reload()
+}
+
+func (h *MainHandler) changeCertbotstatus(data any) (agentintegration.ChangeCertbotStatusResponseData, error) {
+	h.mx.Lock()
+	defer h.mx.Unlock()
+
+	var version string
+	var request agentintegration.ChangeCertbotStatusRequestData
+	var response agentintegration.ChangeCertbotStatusResponseData
+
+	err := mapstructure.Decode(data, &request)
+
+	if err != nil {
+		return response, fmt.Errorf("invalid request data: %v", err)
+	}
+
+	// before enabling certbot check it is installed
+	if request.Value {
+		version, err = certbot.GetVersion(h.config)
+
+		if err != nil {
+			return response, err
+		}
+	}
+
+	err = h.config.SetParam(config.CertBotEnabledOpt, fmt.Sprintf("%v", request.Value))
+
+	if err != nil {
+		return response, err
+	}
+
+	response.Version = version
+
+	return response, nil
 }
 
 func CreateMainHandler(config *config.Config, logger logger.Logger, mx *sync.Mutex) *MainHandler {

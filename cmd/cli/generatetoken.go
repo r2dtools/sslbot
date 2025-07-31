@@ -2,11 +2,9 @@ package cli
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 
 	"github.com/google/uuid"
 )
@@ -32,27 +30,7 @@ var GenerateTokenCmd = &cobra.Command{
 		}
 
 		token := randomUuid.String()
-		data, err := os.ReadFile(conf.ConfigFilePath)
-
-		if err != nil {
-			return err
-		}
-
-		confMap := make(map[string]interface{})
-		err = yaml.Unmarshal(data, confMap)
-
-		if err != nil {
-			return err
-		}
-
-		confMap["token"] = token
-		data, err = yaml.Marshal(confMap)
-
-		if err != nil {
-			return err
-		}
-
-		err = os.WriteFile(conf.ConfigFilePath, data, 0644)
+		err = conf.SetParam(config.TokenOpt, token)
 
 		if err != nil {
 			return err
