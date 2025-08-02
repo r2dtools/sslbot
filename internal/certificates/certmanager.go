@@ -292,15 +292,9 @@ func CreateCertificateManager(
 	}
 
 	certStorages[Lego] = legoStorage
-	certbotStorage, err := certbot.CreateCertStorage(config, logger)
 
-	if err != nil && !errors.Is(err, certbot.ErrStorageDirNotExists) {
-		return nil, err
-	}
-
-	if err == nil {
-		certStorages[CertBot] = certbotStorage
-	}
+	certbotStorage := certbot.CreateCertStorage(config, logger)
+	certStorages[CertBot] = certbotStorage
 
 	certManager := &CertificateManager{
 		mx:              mx,

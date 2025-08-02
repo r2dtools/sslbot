@@ -1,7 +1,6 @@
 package certbot
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -14,8 +13,6 @@ import (
 	"github.com/r2dtools/sslbot/internal/utils"
 	"github.com/unknwon/com"
 )
-
-var ErrStorageDirNotExists = errors.New("certbot storage directory does not exist")
 
 type CertBotStorage struct {
 	*sync.RWMutex
@@ -71,6 +68,10 @@ func (s *CertBotStorage) GetCertificateAsString(certName string) (certPath strin
 func (s *CertBotStorage) GetCertificates() (map[string]*dto.Certificate, error) {
 	s.RLock()
 	defer s.RUnlock()
+
+	if !com.IsDir(s.path) {
+		return nil, nil
+	}
 
 	certNameMap, err := s.getStorageCertNameMap()
 
@@ -131,17 +132,11 @@ func (s *CertBotStorage) getPrivateKeyPath(certName string) string {
 	return filepath.Join(s.path, certName, "privkey.pem")
 }
 
-func CreateCertStorage(config *config.Config, logger logger.Logger) (*CertBotStorage, error) {
-	workDir := config.CertBotWokrDir
-
-	if !com.IsExist(workDir) {
-		return nil, ErrStorageDirNotExists
-	}
-
+func CreateCertStorage(config *config.Config, logger logger.Logger) *CertBotStorage {
 	return &CertBotStorage{
 		RWMutex: &sync.RWMutex{},
-		path:    workDir,
+		path:    config.CertBotWokrDir,
 		bin:     config.CertBotBin,
 		logger:  logger,
-	}, nil
+	}
 }

@@ -149,7 +149,7 @@ func (c *Config) SetParam(name string, value any) error {
 		return err
 	}
 
-	confMap := make(map[string]interface{})
+	confMap := make(map[string]any)
 	err = yaml.Unmarshal(data, confMap)
 
 	if err != nil {

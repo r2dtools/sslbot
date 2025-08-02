@@ -68,11 +68,7 @@ func buildCmdParams(request request.IssueRequest, challengeType acme.ChallengeTy
 }
 
 func CreateCertBot(config *config.Config, logger logger.Logger) (*CertBot, error) {
-	storage, err := CreateCertStorage(config, logger)
-
-	if err != nil {
-		return nil, err
-	}
+	storage := CreateCertStorage(config, logger)
 
 	return &CertBot{bin: config.CertBotBin, storage: storage}, nil
 }
