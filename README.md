@@ -55,10 +55,10 @@
    systemctl status sslbot.service
    ```
 6. **Ensure port `60150` is open (default):**
-   - This is required for communication with SSLPanel.
-   - You can change the port via environment variable SSLBOT_PORT:
+   - This is required for communication with SSLPanel
+   - You can change the port in /opt/params.yaml configuration file:
      ```
-     export SSLBOT_PORT=<port>
+     port: <port>
      ```
    - Restart the service after changing the port:
      ```bash
