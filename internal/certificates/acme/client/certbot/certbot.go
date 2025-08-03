@@ -14,6 +14,7 @@ import (
 
 type CertBot struct {
 	bin     string
+	logger  logger.Logger
 	storage *CertBotStorage
 }
 
@@ -30,6 +31,9 @@ func (b *CertBot) Issue(docRoot string, request request.IssueRequest) (string, s
 
 	params := buildCmdParams(request, challengeType)
 	cmd := exec.Command(b.bin, params...)
+
+	b.logger.Debug(fmt.Sprintf("certbot command params: %+v", params))
+
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
@@ -70,7 +74,7 @@ func buildCmdParams(request request.IssueRequest, challengeType acme.ChallengeTy
 func CreateCertBot(config *config.Config, logger logger.Logger) (*CertBot, error) {
 	storage := CreateCertStorage(config, logger)
 
-	return &CertBot{bin: config.CertBotBin, storage: storage}, nil
+	return &CertBot{bin: config.CertBotBin, logger: logger, storage: storage}, nil
 }
 
 func GetVersion(config *config.Config) (string, error) {
