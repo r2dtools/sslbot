@@ -52,21 +52,21 @@ func buildCmdParams(request request.IssueRequest, challengeType acme.ChallengeTy
 	params := []string{}
 
 	if request.Assign {
-		params = append(params, "run", "-a webroot", "-i "+request.WebServer)
+		params = append(params, "run", "-a", "webroot", "-i", request.WebServer)
 	} else {
 		params = append(params, "certonly")
 	}
 
 	params = append(params, challengeType.GetParams()...)
-	params = append(params, "-d "+serverName)
+	params = append(params, "-d", serverName)
 
 	for _, subject := range request.Subjects {
 		if subject != serverName {
-			params = append(params, "-d "+subject)
+			params = append(params, "-d", subject)
 		}
 	}
 
-	params = append(params, "-m "+request.Email, "-n", "--agree-tos")
+	params = append(params, "-m", request.Email, "-n", "--agree-tos")
 
 	return params
 }
