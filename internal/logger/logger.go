@@ -57,7 +57,12 @@ func NewLogger(config *config.Config) (Logger, error) {
 		outputPaths = append(outputPaths, "stderr")
 	} else {
 		outputPaths = append(outputPaths, config.LogFile)
-		loggerConfig = zap.NewProductionConfig()
+
+		if config.Debug {
+			loggerConfig = zap.NewDevelopmentConfig()
+		} else {
+			loggerConfig = zap.NewProductionConfig()
+		}
 	}
 
 	loggerConfig.OutputPaths = outputPaths

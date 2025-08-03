@@ -56,7 +56,7 @@
    ```
 6. **Ensure port `60150` is open (default):**
    - This is required for communication with SSLPanel
-   - You can change the port in /opt/params.yaml configuration file:
+   - You can change the port in /opt/config.yaml configuration file:
      ```
      port: <port>
      ```
