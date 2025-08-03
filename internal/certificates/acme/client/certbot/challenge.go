@@ -9,5 +9,5 @@ type DNSChallengeType struct {
 }
 
 func (ct HTTPChallengeType) GetParams() []string {
-	return []string{"-w " + ct.WebRoot}
+	return []string{"-w", ct.WebRoot}
 }
