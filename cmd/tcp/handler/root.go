@@ -232,7 +232,7 @@ func (h *MainHandler) changeCertbotstatus(data any) (agentintegration.ChangeCert
 		}
 	}
 
-	err = h.config.SetParam(config.CertBotEnabledOpt, fmt.Sprintf("%v", request.Value))
+	err = h.config.SetParam(config.CertBotEnabledOpt, request.Value)
 
 	if err != nil {
 		return response, err
