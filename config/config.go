@@ -37,6 +37,7 @@ type Config struct {
 	CertBotBin         string
 	CertBotWokrDir     string
 	NginxAcmeCommonDir string
+	Debug              bool
 	rootPath           string
 }
 
@@ -81,6 +82,7 @@ func GetConfig() (*Config, error) {
 	viper.SetDefault(CertBotBinOpt, defaultCertBotBin)
 	viper.SetDefault(NginxAcmeCommonDirOpt, defaultNginxAcmeCommonDir)
 	viper.SetDefault(NginxRootOpt, defaultNginxRoot)
+	viper.SetDefault(DebugOpt, false)
 
 	if com.IsFile(configFilePath) {
 		configFile, err := os.OpenFile(configFilePath, os.O_RDONLY, 0644)
@@ -191,4 +193,5 @@ func setDynamicParams(c *Config) {
 	c.CertBotBin = viper.GetString(CertBotBinOpt)
 	c.CertBotWokrDir = viper.GetString(CertBotWorkDirOpt)
 	c.NginxAcmeCommonDir = viper.GetString(NginxAcmeCommonDirOpt)
+	c.Debug = viper.GetBool(DebugOpt)
 }

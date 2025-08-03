@@ -10,4 +10,5 @@ const (
 	CertBotBinOpt         = "certbot_bin"
 	CertBotWorkDirOpt     = "certbot_work_dir"
 	CertBotEnabledOpt     = "certbot_enabled"
+	DebugOpt              = "debug"
 )
