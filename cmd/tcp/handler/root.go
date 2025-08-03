@@ -87,7 +87,7 @@ func (h *MainHandler) getVhosts() ([]agentintegration.VirtualHost, error) {
 	options := h.config.ToMap()
 
 	for _, webServerCode := range webServerCodes {
-		webserver, err := webserver.GetWebServer(webServerCode, options)
+		webserver, err := webserver.CreateWebServer(webServerCode, options)
 
 		if err != nil {
 			h.logger.Error(err.Error())
@@ -149,7 +149,7 @@ func (h *MainHandler) getVhostConfig(data any) (agentintegration.VirtualHostConf
 	}
 
 	options := h.config.ToMap()
-	wServer, err := webserver.GetWebServer(request.WebServer, options)
+	wServer, err := webserver.CreateWebServer(request.WebServer, options)
 
 	if err != nil {
 		return response, err
@@ -194,7 +194,7 @@ func (h *MainHandler) reloadWebServer(data any) error {
 		return fmt.Errorf("invalid request data: %v", err)
 	}
 
-	wServer, err := webserver.GetWebServer(request.WebServer, h.config.ToMap())
+	wServer, err := webserver.CreateWebServer(request.WebServer, h.config.ToMap())
 
 	if err != nil {
 		return err

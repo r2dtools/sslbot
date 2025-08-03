@@ -15,36 +15,54 @@ var ServeCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Starts TCP server",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		config, err := config.GetConfig()
+		conf, err := config.GetConfig()
 
 		if err != nil {
 			return err
 		}
 
-		logger, err := logger.NewLogger(config)
+		logger, err := logger.NewLogger(conf)
 
 		if err != nil {
 			return err
 		}
 
 		mx := &sync.Mutex{}
-		mainHandler := handler.CreateMainHandler(config, logger, mx)
-		certificatesHandler, err := handler.CreateCertificatesHandler(config, logger, mx)
+		mainHandler := handler.CreateMainHandler(conf, logger, mx)
+		certificatesHandler, err := handler.CreateCertificatesHandler(conf, logger, mx)
 
 		if err != nil {
 			return err
 		}
 
-		router := router.Router{}
-		router.RegisterHandler("main", mainHandler)
-		router.RegisterHandler("certificates", certificatesHandler)
+		botRouter := router.Router{}
+		botRouter.RegisterHandler("main", mainHandler)
+		botRouter.RegisterHandler("certificates", certificatesHandler)
 
 		server := &tcp.Server{
-			Port:   config.Port,
-			Router: router,
+			Port:   conf.Port,
+			Router: botRouter,
 			Logger: logger,
-			Config: config,
+			Config: conf,
 		}
+
+		conf.OnChange(func() {
+			logger.Info("reload router ...")
+			mainHandler = handler.CreateMainHandler(conf, logger, mx)
+			certificatesHandler, err = handler.CreateCertificatesHandler(conf, logger, mx)
+
+			if err != nil {
+				logger.Error("router reload failed: %v", err)
+
+				return
+			}
+
+			botRouter = router.Router{}
+			botRouter.RegisterHandler("main", mainHandler)
+			botRouter.RegisterHandler("certificates", certificatesHandler)
+
+			server.Router = botRouter
+		})
 
 		return server.Serve()
 	},

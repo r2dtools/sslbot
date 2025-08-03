@@ -31,7 +31,7 @@ type WebServer interface {
 	GetProcessManager() (ProcessManager, error)
 }
 
-func GetWebServer(webServerCode string, options map[string]string) (WebServer, error) {
+func CreateWebServer(webServerCode string, options map[string]string) (WebServer, error) {
 	var webServer WebServer
 	var err error
 

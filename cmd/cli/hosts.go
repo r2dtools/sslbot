@@ -44,7 +44,7 @@ var HostsCmd = &cobra.Command{
 		var vhosts []dto.VirtualHost
 
 		for _, webServerCode := range webServerCodes {
-			webServer, err := webserver.GetWebServer(webServerCode, conf.ToMap())
+			webServer, err := webserver.CreateWebServer(webServerCode, conf.ToMap())
 
 			if err != nil {
 				log.Info(fmt.Sprintf("failed to get %s webserver: %v", webServerCode, err))

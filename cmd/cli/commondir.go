@@ -43,7 +43,7 @@ var CommonDirCmd = &cobra.Command{
 			return fmt.Errorf("invalid webserver %s", webServerCode)
 		}
 
-		webServer, err := webserver.GetWebServer(webServerCode, config.ToMap())
+		webServer, err := webserver.CreateWebServer(webServerCode, config.ToMap())
 
 		if err != nil {
 			return err

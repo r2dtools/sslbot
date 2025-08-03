@@ -52,7 +52,7 @@ var IssueCertificateCmd = &cobra.Command{
 
 		certManager, err := certificates.CreateCertificateManager(
 			config,
-			webserver.GetWebServer,
+			webserver.CreateWebServer,
 			reverter.CreateReverter,
 			log,
 			&sync.Mutex{},

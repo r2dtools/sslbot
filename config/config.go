@@ -195,3 +195,10 @@ func setDynamicParams(c *Config) {
 	c.NginxAcmeCommonDir = viper.GetString(NginxAcmeCommonDirOpt)
 	c.Debug = viper.GetBool(DebugOpt)
 }
+
+func (c *Config) OnChange(callback func()) {
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		setDynamicParams(c)
+		callback()
+	})
+}

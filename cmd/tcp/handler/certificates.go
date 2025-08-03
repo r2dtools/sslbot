@@ -195,7 +195,7 @@ func (h *CertificatesHandler) commonDirStatus(data any) (*agentintegration.Commo
 	}
 
 	options := h.config.ToMap()
-	wServer, err := webserver.GetWebServer(requestData.WebServer, options)
+	wServer, err := webserver.CreateWebServer(requestData.WebServer, options)
 
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (h *CertificatesHandler) changeCommonDirStatus(data any) error {
 	}
 
 	options := h.config.ToMap()
-	wServer, err := webserver.GetWebServer(requestData.WebServer, options)
+	wServer, err := webserver.CreateWebServer(requestData.WebServer, options)
 
 	if err != nil {
 		return err
@@ -251,7 +251,7 @@ func (h *CertificatesHandler) changeCommonDirStatus(data any) error {
 func CreateCertificatesHandler(config *config.Config, logger logger.Logger, mx *sync.Mutex) (router.HandlerInterface, error) {
 	certManager, err := certificates.CreateCertificateManager(
 		config,
-		webserver.GetWebServer,
+		webserver.CreateWebServer,
 		reverter.CreateReverter,
 		logger,
 		mx,
