@@ -24,6 +24,7 @@ type Lego struct {
 	bin      string
 	caServer string
 	dataDir  string
+	logger   logger.Logger
 	storage  *LegoStorage
 }
 
@@ -64,6 +65,9 @@ func (l *Lego) execCmd(command string, params []string) error {
 	aParams := []string{"--server=" + l.caServer, "--accept-tos", "--path=" + l.dataDir, "--pem"}
 	params = append(params, aParams...)
 	params = append(params, command)
+
+	l.logger.Debug("lego command params: %+v", params)
+
 	cmd := exec.Command(l.bin, params...)
 	output, err := cmd.CombinedOutput()
 
@@ -147,6 +151,7 @@ func CreateClient(config *config.Config, logger logger.Logger) (*Lego, error) {
 		caServer: config.CaServer,
 		dataDir:  dataDir,
 		storage:  storage,
+		logger:   logger,
 	}
 
 	return client, nil

@@ -32,7 +32,7 @@ func (b *CertBot) Issue(docRoot string, request request.IssueRequest) (string, s
 	params := buildCmdParams(request, challengeType)
 	cmd := exec.Command(b.bin, params...)
 
-	b.logger.Debug(fmt.Sprintf("certbot command params: %+v", params))
+	b.logger.Debug("certbot command params: %+v", params)
 
 	output, err := cmd.CombinedOutput()
 
