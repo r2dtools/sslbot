@@ -54,7 +54,7 @@ func buildCmdParams(request request.IssueRequest, challengeType acme.ChallengeTy
 	if request.Assign {
 		params = append(params, "run", "-a", "webroot", "-i", request.WebServer)
 	} else {
-		params = append(params, "certonly")
+		params = append(params, "certonly", "--webroot")
 	}
 
 	params = append(params, challengeType.GetParams()...)
