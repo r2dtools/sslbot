@@ -21,10 +21,10 @@ func TestBuildCmdParams(t *testing.T) {
 	params := buildCmdParams(request, challengeType)
 	cmd := strings.Join(params, " ")
 
-	assert.Equal(t, "certonly --webroot -w path -d example.com -d www.example.com -m test@email.com -n --agree-tos", cmd)
+	assert.Equal(t, "certonly --webroot -w path -d example.com -d www.example.com -m test@email.com --expand -n --agree-tos", cmd)
 
 	request.Assign = true
 	params = buildCmdParams(request, challengeType)
 	cmd = strings.Join(params, " ")
-	assert.Equal(t, "run -a webroot -i nginx -w path -d example.com -d www.example.com -m test@email.com -n --agree-tos", cmd)
+	assert.Equal(t, "run -a webroot -i nginx -w path -d example.com -d www.example.com -m test@email.com --expand -n --agree-tos", cmd)
 }
