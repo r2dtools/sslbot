@@ -66,6 +66,26 @@
 
 ---
 
+## 🚀 Update
+
+1. **Connect to your server via SSH**
+
+2. **Download and unpack the latest SSLBot archive:**
+   ```bash
+   wget -O sslbot.tar.gz https://github.com/r2dtools/sslbot/releases/latest/download/r2dtools-sslbot.tar.gz \
+   && mkdir -p /opt/r2dtools \
+   && tar -xzf sslbot.tar.gz -C /opt/r2dtools
+   ```
+3. **Restart the SSLBot service:**
+   ```bash
+   systemctl restart sslbot.service
+   ```
+5. **Check if the SSLBot service is running:**
+   ```bash
+   systemctl status sslbot.service
+
+---
+
 ## 🔑 Connecting SSLBot to SSLPanel
 
 Generate a connection token:
@@ -98,7 +118,7 @@ To view the token:
 
 - Ensure `systemctl status sslbot.service` shows the service is **active**.
 - Make sure port `60150` is **open** and **not blocked by firewall rules**.
-- If you change the port or any config, remember to restart:
+- If you change the port or any config parameter, remember to restart:
   ```bash
   systemctl restart sslbot.service
   ```
