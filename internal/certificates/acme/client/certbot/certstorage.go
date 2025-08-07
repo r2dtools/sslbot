@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/r2dtools/sslbot/config"
@@ -54,13 +55,20 @@ func (s *CertBotStorage) GetCertificateAsString(certName string) (certPath strin
 	defer s.RUnlock()
 
 	certPath = s.getCertificatePath(certName)
+	certKeyPath := s.getPrivateKeyPath(certName)
 	certContentBytes, err := os.ReadFile(certPath)
 
 	if err != nil {
 		return "", "", fmt.Errorf("failed to read certificate content: %v", err)
 	}
 
-	certContent = string(certContentBytes)
+	certKeyBytes, err := os.ReadFile(certKeyPath)
+
+	if err != nil {
+		return "", "", fmt.Errorf("failed to read certificate key: %v", err)
+	}
+
+	certContent = strings.Join([]string{string(certKeyBytes), string(certContentBytes)}, "")
 
 	return
 }
