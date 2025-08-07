@@ -19,7 +19,7 @@
 
 ---
 
-## 🚀 Installation
+## 🚀 Install
 
 1. **Connect to your server via SSH**
 
