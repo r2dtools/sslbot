@@ -43,12 +43,16 @@ func (l *Lego) Issue(docRoot string, request request.IssueRequest) (string, stri
 		return "", "", fmt.Errorf("unsupported challenge type: %s", request.ChallengeType)
 	}
 
-	params := []string{"--email=" + request.Email, "--domains=" + serverName}
+	params := []string{"--domains=" + serverName}
 
 	for _, subject := range request.Subjects {
 		if subject != serverName {
 			params = append(params, "--domains="+subject)
 		}
+	}
+
+	if request.Email != "" {
+		params = append(params, "--email="+request.Email)
 	}
 
 	params = append(params, challengeType.GetParams()...)

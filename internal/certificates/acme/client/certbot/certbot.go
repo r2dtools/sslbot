@@ -66,7 +66,11 @@ func buildCmdParams(request request.IssueRequest, challengeType acme.ChallengeTy
 		}
 	}
 
-	params = append(params, "-m", request.Email, "--expand", "-n", "--agree-tos")
+	if request.Email != "" {
+		params = append(params, "-m", request.Email)
+	}
+
+	params = append(params, "--expand", "-n", "--agree-tos")
 
 	return params
 }
