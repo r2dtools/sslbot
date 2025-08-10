@@ -9,7 +9,7 @@ import (
 )
 
 type AcmeClient interface {
-	Issue(docRoot string, request request.IssueRequest) (string, string, error)
+	Issue(docRoot string, request request.IssueRequest) (certPath string, keyPath string, deployed bool, err error)
 }
 
 func CreateAcmeClient(config *config.Config, logger logger.Logger) (AcmeClient, error) {

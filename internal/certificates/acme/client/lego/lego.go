@@ -28,7 +28,7 @@ type Lego struct {
 	storage  *LegoStorage
 }
 
-func (l *Lego) Issue(docRoot string, request request.IssueRequest) (string, string, error) {
+func (l *Lego) Issue(docRoot string, request request.IssueRequest) (certPath string, keyPath string, deployed bool, err error) {
 	var challengeType acme.ChallengeType
 	serverName := request.ServerName
 
@@ -40,7 +40,9 @@ func (l *Lego) Issue(docRoot string, request request.IssueRequest) (string, stri
 			WebRoot:  docRoot,
 		}
 	default:
-		return "", "", fmt.Errorf("unsupported challenge type: %s", request.ChallengeType)
+		err = fmt.Errorf("unsupported challenge type: %s", request.ChallengeType)
+
+		return
 	}
 
 	params := []string{"--domains=" + serverName}
@@ -56,13 +58,15 @@ func (l *Lego) Issue(docRoot string, request request.IssueRequest) (string, stri
 	}
 
 	params = append(params, challengeType.GetParams()...)
-	err := l.execCmd("run", params)
+	err = l.execCmd("run", params)
 
 	if err != nil {
-		return "", "", err
+		return
 	}
 
-	return l.storage.GetCertificatePath(serverName)
+	certPath, keyPath, err = l.storage.GetCertificatePath(serverName)
+
+	return
 }
 
 func (l *Lego) execCmd(command string, params []string) error {

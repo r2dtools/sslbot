@@ -95,7 +95,7 @@ func (c *CertificateManager) Issue(request request.IssueRequest) (*dto.Certifica
 		docRoot = commonDir.Root
 	}
 
-	certPath, keyPath, err := c.acmeClient.Issue(docRoot, request)
+	certPath, keyPath, deployed, err := c.acmeClient.Issue(docRoot, request)
 
 	if err != nil {
 		c.logger.Debug("%v", err)
@@ -103,7 +103,7 @@ func (c *CertificateManager) Issue(request request.IssueRequest) (*dto.Certifica
 		return nil, err
 	}
 
-	if request.Assign {
+	if request.Assign && !deployed {
 		certDeployer.DeployCertificate(serverName, certPath, keyPath, request.PreventReload)
 	}
 

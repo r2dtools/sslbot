@@ -18,7 +18,7 @@ type CertBot struct {
 	storage *CertBotStorage
 }
 
-func (b *CertBot) Issue(docRoot string, request request.IssueRequest) (string, string, error) {
+func (b *CertBot) Issue(docRoot string, request request.IssueRequest) (certPath string, keyPath string, deployed bool, err error) {
 	var challengeType acme.ChallengeType
 	serverName := request.ServerName
 
@@ -26,7 +26,9 @@ func (b *CertBot) Issue(docRoot string, request request.IssueRequest) (string, s
 	case acme.HttpChallengeTypeCode:
 		challengeType = HTTPChallengeType{WebRoot: docRoot}
 	default:
-		return "", "", fmt.Errorf("unsupported challenge type: %s", request.ChallengeType)
+		err = fmt.Errorf("unsupported challenge type: %s", request.ChallengeType)
+
+		return
 	}
 
 	params := buildCmdParams(request, challengeType)
@@ -38,13 +40,21 @@ func (b *CertBot) Issue(docRoot string, request request.IssueRequest) (string, s
 
 	if err != nil {
 		if len(output) == 0 {
-			return "", "", err
+			return
 		}
 
-		return "", "", fmt.Errorf("%s\n%s", output, err.Error())
+		err = fmt.Errorf("%s\n%s", output, err.Error())
+
+		return
 	}
 
-	return b.storage.GetCertificatePath(serverName)
+	certPath, keyPath, err = b.storage.GetCertificatePath(serverName)
+
+	if err != nil {
+		return
+	}
+
+	return certPath, keyPath, request.Assign, nil
 }
 
 func buildCmdParams(request request.IssueRequest, challengeType acme.ChallengeType) []string {
