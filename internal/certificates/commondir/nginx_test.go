@@ -1,6 +1,7 @@
 package commondir
 
 import (
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -11,7 +12,6 @@ import (
 	"github.com/r2dtools/sslbot/internal/webserver"
 	"github.com/r2dtools/sslbot/internal/webserver/reverter"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/slices"
 )
 
 const nginxCommonDir = "/var/www/html/"
