@@ -11,4 +11,5 @@ const (
 	CertBotWorkDirOpt     = "certbot_work_dir"
 	CertBotEnabledOpt     = "certbot_enabled"
 	DebugOpt              = "debug"
+	ApacheRootOpt         = "apache_root"
 )

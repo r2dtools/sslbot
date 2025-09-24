@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/r2dtools/agentintegration v1.6.5
+	github.com/r2dtools/goapacheconf v1.0.0
 	github.com/r2dtools/gonginxconf v1.2.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/cobra v1.9.1
@@ -15,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/unknwon/com v1.0.1
 	go.uber.org/zap v1.27.0
-	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	gopkg.in/yaml.v3 v3.0.1
 )
 

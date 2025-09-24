@@ -72,7 +72,7 @@ func (nws *NginxWebServer) GetVhosts() ([]dto.VirtualHost, error) {
 			Ssl:         nVhost.HasSSL(),
 			WebServer:   WebServerNginxCode,
 			Addresses:   addresses,
-			Certificate: getCertificate(nVhost),
+			Certificate: getNginxCertificate(nVhost),
 		}
 		vhosts = append(vhosts, vhost)
 	}
@@ -102,7 +102,7 @@ func GetNginxWebServer(options map[string]string) (*NginxWebServer, error) {
 	}, nil
 }
 
-func getCertificate(serverBlock nginxConfig.ServerBlock) *dto.Certificate {
+func getNginxCertificate(serverBlock nginxConfig.ServerBlock) *dto.Certificate {
 	certDirectives := serverBlock.FindDirectives(NginxCertDirective)
 
 	if len(certDirectives) == 0 {

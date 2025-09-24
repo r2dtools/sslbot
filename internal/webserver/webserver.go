@@ -21,7 +21,7 @@ type ProcessManager interface {
 }
 
 func GetSupportedWebServers() []string {
-	return []string{WebServerNginxCode}
+	return []string{WebServerNginxCode, WebServerApacheCode}
 }
 
 type WebServer interface {
@@ -38,6 +38,8 @@ func CreateWebServer(webServerCode string, options map[string]string) (WebServer
 	switch webServerCode {
 	case WebServerNginxCode:
 		webServer, err = GetNginxWebServer(options)
+	case WebServerApacheCode:
+		webServer, err = GetApacheWebServer(options)
 	default:
 		err = fmt.Errorf("webserver '%s' is not supported", webServerCode)
 	}

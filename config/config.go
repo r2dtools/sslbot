@@ -18,6 +18,7 @@ const (
 	defaultCertBotBin         = "certbot"
 	defaultNginxRoot          = "/etc/nginx"
 	defaultNginxAcmeCommonDir = "/var/www/html/"
+	defaultApacheRoot         = "/etc/apache2"
 )
 
 var isDevMode = true
@@ -82,6 +83,7 @@ func GetConfig() (*Config, error) {
 	viper.SetDefault(CertBotBinOpt, defaultCertBotBin)
 	viper.SetDefault(NginxAcmeCommonDirOpt, defaultNginxAcmeCommonDir)
 	viper.SetDefault(NginxRootOpt, defaultNginxRoot)
+	viper.SetDefault(ApacheRootOpt, defaultApacheRoot)
 	viper.SetDefault(DebugOpt, false)
 
 	if com.IsFile(configFilePath) {
