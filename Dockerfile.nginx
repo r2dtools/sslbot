@@ -1,7 +1,6 @@
 FROM golang:1.24
 
-RUN apt update && apt install -y \
-    nginx
+RUN apt update && apt install -y nginx
 
 COPY test/nginx/nginxconfig.io /etc/nginx/nginxconfig.io
 COPY test/nginx/sites-available /etc/nginx/sites-available
@@ -10,7 +9,7 @@ COPY test/nginx/fastcgi_params /etc/nginx/
 COPY test/nginx/mime.types /etc/nginx/
 COPY test/nginx/nginx.conf /etc/nginx/
 
-RUN mkdir -p /usr/local/r2dtools/var/lego/certificates /usr/local/r2dtools/var/lego/certificates
+RUN mkdir -p /usr/local/r2dtools/var/lego/certificates /usr/local/r2dtools/var/default/certificates
 COPY test/certificate /usr/local/r2dtools/var/lego/certificates
 COPY test/certificate /usr/local/r2dtools/var/default/certificates
 
@@ -31,4 +30,4 @@ RUN ln -s /etc/nginx/sites-available/example.com.conf /etc/nginx/sites-enabled/e
     ln -s /etc/nginx/sites-available/example4.com.conf /etc/nginx/sites-enabled/example4.com.conf && \
     ln -s /etc/nginx/sites-available/webmail.conf /etc/nginx/sites-enabled/webmail.conf
 
-ENTRYPOINT ["/bin/sh", "./script/testcmd.sh"]
+ENTRYPOINT ["/bin/sh", "./script/test_nginx_cmd.sh"]

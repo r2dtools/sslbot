@@ -1,3 +1,5 @@
+//go:build nginx
+
 package hostmng
 
 import (

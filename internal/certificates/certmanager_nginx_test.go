@@ -1,3 +1,5 @@
+//go:build nginx
+
 package certificates
 
 import (
@@ -17,13 +19,6 @@ const (
 	varDir         = "/usr/local/r2dtools/var"
 	certBotWorkDir = "/etc/letsencrypt/live"
 )
-
-type testCertManager struct {
-	*CertificateManager
-
-	reverter reverter.Reverter
-	wServer  webserver.WebServer
-}
 
 type testReverter struct {
 	reverter.Reverter

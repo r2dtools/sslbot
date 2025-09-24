@@ -1,3 +1,5 @@
+//go:build common
+
 package lego
 
 import (

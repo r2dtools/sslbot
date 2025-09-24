@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"path/filepath"
+	"slices"
 
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/certificates/deploy"
@@ -11,7 +12,6 @@ import (
 	"github.com/r2dtools/sslbot/internal/webserver/hostmng"
 	"github.com/r2dtools/sslbot/internal/webserver/reverter"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slices"
 )
 
 var DeployCertificateCmd = &cobra.Command{

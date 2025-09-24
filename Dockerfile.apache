@@ -1,0 +1,25 @@
+FROM golang:1.24
+
+RUN apt update && apt install -y apache2
+
+COPY test/apache/sites-available /etc/apache2/sites-available
+
+RUN mkdir -p /usr/local/r2dtools/var/lego/certificates /usr/local/r2dtools/var/default/certificates
+COPY test/certificate /usr/local/r2dtools/var/lego/certificates
+COPY test/certificate /usr/local/r2dtools/var/default/certificates
+
+
+RUN mkdir -p /etc/letsencrypt/live/example.com /etc/letsencrypt/live/example2.com
+COPY test/certificate/example.com.pem /etc/letsencrypt/live/example.com/fullchain.pem
+COPY test/certificate/example2.com.pem /etc/letsencrypt/live/example2.com/fullchain.pem
+
+RUN mkdir /opt/r2dtools
+VOLUME /opt/r2dtools
+COPY . /opt/r2dtools
+WORKDIR  /opt/r2dtools
+RUN go mod download
+RUN go install ./...
+
+RUN ln -s /etc/apache2/sites-available/example.com.conf /etc/apache2/sites-enabled/example.com.conf
+
+ENTRYPOINT ["/bin/sh", "./script/test_apache_cmd.sh"]

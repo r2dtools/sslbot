@@ -3,6 +3,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/r2dtools/sslbot/config"
@@ -10,7 +11,6 @@ import (
 	"github.com/r2dtools/sslbot/internal/logger"
 	"github.com/r2dtools/sslbot/internal/webserver"
 	"github.com/spf13/cobra"
-	"golang.org/x/exp/slices"
 	"gopkg.in/yaml.v3"
 )
 
