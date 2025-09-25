@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFindProcessByName(t *testing.T) {
+func TestFindNginxProcessByName(t *testing.T) {
 	nginxProcess, err := findProcessByName([]string{"nginx"})
 	assert.Nilf(t, err, "find nginx process failed: %v", err)
 	assert.NotNilf(t, nginxProcess, "nginx process is nil")
