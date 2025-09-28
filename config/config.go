@@ -11,35 +11,37 @@ import (
 )
 
 const (
-	defaultPort               = 60150
-	defaultCaServer           = "https://acme-v02.api.letsencrypt.org/directory"
-	defaultVarDir             = "/usr/local/r2dtools/sslbot/var"
-	defaultCertBotDataDir     = "/etc/letsencrypt/live"
-	defaultCertBotBin         = "certbot"
-	defaultNginxRoot          = "/etc/nginx"
-	defaultNginxAcmeCommonDir = "/var/www/html/"
-	defaultApacheRoot         = "/etc/apache2"
+	defaultPort                = 60150
+	defaultCaServer            = "https://acme-v02.api.letsencrypt.org/directory"
+	defaultVarDir              = "/usr/local/r2dtools/sslbot/var"
+	defaultCertBotDataDir      = "/etc/letsencrypt/live"
+	defaultCertBotBin          = "certbot"
+	defaultNginxRoot           = "/etc/nginx"
+	defaultNginxAcmeCommonDir  = "/var/www/html/"
+	defaultApacheRoot          = "/etc/apache2"
+	defaultApacheAcmeCommonDir = "/var/www/html/"
 )
 
 var isDevMode = true
 var Version string
 
 type Config struct {
-	LogFile            string
-	Port               int
-	Token              string
-	IsDevMode          bool
-	Version            string
-	LegoBin            string
-	CaServer           string
-	ConfigFilePath     string
-	VarDir             string
-	CertBotEnabled     bool
-	CertBotBin         string
-	CertBotWokrDir     string
-	NginxAcmeCommonDir string
-	Debug              bool
-	rootPath           string
+	LogFile             string
+	Port                int
+	Token               string
+	IsDevMode           bool
+	Version             string
+	LegoBin             string
+	CaServer            string
+	ConfigFilePath      string
+	VarDir              string
+	CertBotEnabled      bool
+	CertBotBin          string
+	CertBotWokrDir      string
+	NginxAcmeCommonDir  string
+	ApacheAcmeCommonDir string
+	Debug               bool
+	rootPath            string
 }
 
 func GetConfig() (*Config, error) {
@@ -82,6 +84,7 @@ func GetConfig() (*Config, error) {
 	viper.SetDefault(CertBotWorkDirOpt, defaultCertBotDataDir)
 	viper.SetDefault(CertBotBinOpt, defaultCertBotBin)
 	viper.SetDefault(NginxAcmeCommonDirOpt, defaultNginxAcmeCommonDir)
+	viper.SetDefault(ApacheAcmeCommonDirOpt, defaultApacheAcmeCommonDir)
 	viper.SetDefault(NginxRootOpt, defaultNginxRoot)
 	viper.SetDefault(ApacheRootOpt, defaultApacheRoot)
 	viper.SetDefault(DebugOpt, false)
@@ -195,6 +198,7 @@ func setDynamicParams(c *Config) {
 	c.CertBotBin = viper.GetString(CertBotBinOpt)
 	c.CertBotWokrDir = viper.GetString(CertBotWorkDirOpt)
 	c.NginxAcmeCommonDir = viper.GetString(NginxAcmeCommonDirOpt)
+	c.ApacheAcmeCommonDir = viper.GetString(ApacheAcmeCommonDirOpt)
 	c.Debug = viper.GetBool(DebugOpt)
 }
 

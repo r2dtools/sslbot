@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	acmeLocation = "/.well-known/acme-challenge/"
+	nginxAcmeLocation = "/.well-known/acme-challenge/"
 )
 
 type NginxCommonDirQuery struct {
@@ -28,7 +28,7 @@ func (q *NginxCommonDirQuery) GetCommonDirStatus(serverName string) CommonDir {
 		return commonDir
 	}
 
-	commonDirBlock := findCommonDirBlock(serverBlock)
+	commonDirBlock := findNginxCommonDirBlock(serverBlock)
 
 	if commonDirBlock == nil {
 		return commonDir
@@ -78,13 +78,13 @@ func (c *NginxCommonDirChangeCommand) EnableCommonDir(serverName string) error {
 		return err
 	}
 
-	if findCommonDirBlock(serverBlock) != nil {
+	if findNginxCommonDirBlock(serverBlock) != nil {
 		c.logger.Info("common directory is already enabled for %s host", serverName)
 
 		return nil
 	}
 
-	commonDirLocationBlock := serverBlock.AddLocationBlock("^~", acmeLocation, true)
+	commonDirLocationBlock := serverBlock.AddLocationBlock("^~", nginxAcmeLocation, true)
 	commonDirLocationBlock.AddDirective(config.NewDirective("root", []string{c.commonDir}), true, false)
 	commonDirLocationBlock.AddDirective(config.NewDirective("default_type", []string{`"text/plain"`}), true, false)
 
@@ -140,7 +140,7 @@ func (c *NginxCommonDirChangeCommand) DisableCommonDir(serverName string) error 
 		return err
 	}
 
-	commonDirBlock := findCommonDirBlock(serverBlock)
+	commonDirBlock := findNginxCommonDirBlock(serverBlock)
 
 	if commonDirBlock == nil {
 		return nil
@@ -176,11 +176,11 @@ func (c *NginxCommonDirChangeCommand) DisableCommonDir(serverName string) error 
 	return nil
 }
 
-func findCommonDirBlock(serverBlock *config.ServerBlock) *config.LocationBlock {
+func findNginxCommonDirBlock(serverBlock *config.ServerBlock) *config.LocationBlock {
 	locationBlocks := serverBlock.FindLocationBlocks()
 
 	for _, locationBlock := range locationBlocks {
-		if locationBlock.GetLocationMatch() == acmeLocation {
+		if locationBlock.GetLocationMatch() == nginxAcmeLocation {
 			return &locationBlock
 		}
 	}

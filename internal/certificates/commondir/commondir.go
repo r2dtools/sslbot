@@ -24,10 +24,12 @@ type CommonDirChangeCommand interface {
 	DisableCommonDir(serverName string) error
 }
 
-func CreateCommonDirStatusQuery(webServer webserver.WebServer) (*NginxCommonDirQuery, error) {
+func CreateCommonDirStatusQuery(webServer webserver.WebServer) (CommonDirQuery, error) {
 	switch w := webServer.(type) {
 	case *webserver.NginxWebServer:
 		return &NginxCommonDirQuery{webServer: w}, nil
+	case *webserver.ApacheWebServer:
+		return &ApacheCommonDirQuery{webServer: w}, nil
 	default:
 		return nil, fmt.Errorf("webserver %s is not supported", webServer.GetCode())
 	}
@@ -39,7 +41,7 @@ func CreateCommonDirChangeCommand(
 	reverter reverter.Reverter,
 	logger logger.Logger,
 	mx *sync.Mutex,
-) (*NginxCommonDirChangeCommand, error) {
+) (CommonDirChangeCommand, error) {
 	switch w := webServer.(type) {
 	case *webserver.NginxWebServer:
 		return &NginxCommonDirChangeCommand{
@@ -47,6 +49,14 @@ func CreateCommonDirChangeCommand(
 			webServer: w,
 			reverter:  reverter,
 			commonDir: config.NginxAcmeCommonDir,
+			mx:        mx,
+		}, nil
+	case *webserver.ApacheWebServer:
+		return &ApacheCommonDirChangeCommand{
+			logger:    logger,
+			webServer: w,
+			reverter:  reverter,
+			commonDir: config.ApacheAcmeCommonDir,
 			mx:        mx,
 		}, nil
 	default:

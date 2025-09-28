@@ -8,6 +8,7 @@ import (
 	"github.com/r2dtools/sslbot/config"
 	"github.com/r2dtools/sslbot/internal/dto"
 	"github.com/r2dtools/sslbot/internal/utils"
+	"github.com/r2dtools/sslbot/internal/webserver/processmng"
 )
 
 const (
@@ -74,7 +75,7 @@ func (a *ApacheWebServer) GetVhostByName(serverName string) (*dto.VirtualHost, e
 }
 
 func (a *ApacheWebServer) GetProcessManager() (ProcessManager, error) {
-	return nil, nil
+	return processmng.GetApacheProcessManager()
 }
 
 func getApacheCertificate(virtualHostBlock goapacheconf.VirtualHostBlock) *dto.Certificate {

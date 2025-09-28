@@ -42,7 +42,7 @@ func TestNginxCommonDir(t *testing.T) {
 	assert.Len(t, locations, 2)
 
 	acmeBlockExists := slices.ContainsFunc(locations, func(block nginxconfig.LocationBlock) bool {
-		return strings.Contains(block.GetLocationMatch(), acmeLocation)
+		return strings.Contains(block.GetLocationMatch(), nginxAcmeLocation)
 	})
 	assert.True(t, acmeBlockExists)
 
@@ -56,12 +56,12 @@ func TestNginxCommonDir(t *testing.T) {
 	assert.Len(t, locations, 1)
 
 	acmeBlockExists = slices.ContainsFunc(locations, func(block nginxconfig.LocationBlock) bool {
-		return strings.Contains(block.GetLocationMatch(), acmeLocation)
+		return strings.Contains(block.GetLocationMatch(), nginxAcmeLocation)
 	})
 	assert.False(t, acmeBlockExists)
 }
 
-func getNginxCommonDir(t *testing.T) (*NginxCommonDirChangeCommand, *NginxCommonDirQuery, webserver.NginxWebServer, reverter.Reverter) {
+func getNginxCommonDir(t *testing.T) (CommonDirChangeCommand, CommonDirQuery, webserver.NginxWebServer, reverter.Reverter) {
 	config, err := config.GetConfig()
 	assert.Nil(t, err)
 	options := config.ToMap()

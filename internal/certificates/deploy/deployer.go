@@ -21,6 +21,12 @@ func GetCertificateDeployer(webServer webserver.WebServer, reverter reverter.Rev
 			webServer: w,
 			reverter:  reverter,
 		}, nil
+	case *webserver.ApacheWebServer:
+		return &ApacheCertificateDeployer{
+			logger:    logger,
+			webServer: w,
+			reverter:  reverter,
+		}, nil
 	default:
 		return nil, fmt.Errorf("could not create deployer: webserver '%s' is not supported", webServer.GetCode())
 	}

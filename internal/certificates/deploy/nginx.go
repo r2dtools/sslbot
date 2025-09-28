@@ -50,6 +50,18 @@ func (d *NginxCertificateDeployer) DeployCertificate(vhost *dto.VirtualHost, cer
 		d.reverter.BackupConfig(sslServerBlock.FilePath)
 	}
 
+	certPath, err = filepath.Abs(certPath)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	certKeyPath, err = filepath.Abs(certKeyPath)
+
+	if err != nil {
+		return "", "", err
+	}
+
 	d.createOrUpdateSingleDirective(sslServerBlock, webserver.NginxCertKeyDirective, certKeyPath)
 	d.createOrUpdateSingleDirective(sslServerBlock, webserver.NginxCertDirective, certPath)
 
