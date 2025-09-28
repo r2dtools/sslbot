@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/r2dtools/agentintegration v1.6.5
-	github.com/r2dtools/goapacheconf v1.0.0
+	github.com/r2dtools/goapacheconf v1.0.7
 	github.com/r2dtools/gonginxconf v1.2.3
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/cobra v1.9.1
@@ -30,6 +30,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/sagikazarmark/locafero v0.9.0 // indirect
+	github.com/samber/lo v1.51.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spf13/cast v1.9.2 // indirect

@@ -14,7 +14,7 @@ func TestApacheGetVHosts(t *testing.T) {
 	apacheWebServer := getApacheWebServer(t)
 	hosts, err := apacheWebServer.GetVhosts()
 	assert.Nil(t, err)
-	assert.Len(t, hosts, 2)
+	assert.Len(t, hosts, 3)
 }
 
 func getApacheWebServer(t *testing.T) *ApacheWebServer {

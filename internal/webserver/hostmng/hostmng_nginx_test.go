@@ -1,4 +1,4 @@
-//go:build nginx
+//go:build nginX
 
 package hostmng
 
@@ -11,7 +11,7 @@ import (
 )
 
 func TestNginxHost(t *testing.T) {
-	hostManager := NginxHostManager{}
+	hostManager := DefaultHostManager{}
 
 	enabledConfigFilePath := "/etc/nginx/sites-enabled/example3.com.conf"
 	availableConfigFilePath := "/etc/nginx/sites-available/example3.com.conf"

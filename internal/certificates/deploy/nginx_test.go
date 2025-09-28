@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDeployCertificateToNonSslHost(t *testing.T) {
+func TestNginxDeployCertificateToNonSslHost(t *testing.T) {
 	deployer, nginxWebServer, rv := getNginxDeployer(t)
 	defer rv.Rollback()
 
@@ -24,7 +24,7 @@ func TestDeployCertificateToNonSslHost(t *testing.T) {
 	host := findHost(servername, hosts)
 	assert.NotNilf(t, host, "host %s not found", servername)
 
-	configPath, _, err := deployer.DeployCertificate(host, "test/certificate/example.com.key", "test/certificate/example.com.crt")
+	configPath, _, err := deployer.DeployCertificate(host, "test/certificate/example.com.crt", "test/certificate/example.com.key")
 	assert.Nilf(t, err, "deploy certificate error: %v", err)
 	assert.Equal(t, "/etc/nginx/sites-available/example3.com-ssl.conf", configPath)
 
@@ -35,7 +35,7 @@ func TestDeployCertificateToNonSslHost(t *testing.T) {
 	assert.True(t, host.Ssl)
 }
 
-func TestDeployCertificateToSslHost(t *testing.T) {
+func TestNginxDeployCertificateToSslHost(t *testing.T) {
 	deployer, nginxWebServer, rv := getNginxDeployer(t)
 	defer rv.Rollback()
 
