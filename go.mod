@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/r2dtools/agentintegration v1.6.5
-	github.com/r2dtools/goapacheconf v1.0.0
+	github.com/r2dtools/goapacheconf v1.0.4
 	github.com/r2dtools/gonginxconf v1.2.3
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/cobra v1.9.1
