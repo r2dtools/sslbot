@@ -9,7 +9,7 @@ test_apache:
 	docker run --volume="$(shell pwd):/opt/r2dtools" sslbot-apache-tests
 
 build_agent:
-	go build -tags prod -ldflags="-X 'main.Version=${version}'" -o ./build/sslbot -v cmd/main.go
+	go build -tags prod -ldflags="-s -w -X 'main.Version=${version}'" -o ./build/sslbot -v cmd/main.go
 
 build_lego:
 	wget "https://github.com/go-acme/lego/releases/download/v${legoVersion}/lego_v$(legoVersion)_linux_amd64.tar.gz" -O $(legoArchive); \
