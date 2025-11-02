@@ -22,6 +22,7 @@ func TestApacheCommonDir(t *testing.T) {
 
 	commonDir := query.GetCommonDirStatus(host)
 	require.True(t, commonDir.Enabled)
+	require.Equal(t, "/var/www/vhosts/default/htdocs", commonDir.Root)
 
 	err := command.DisableCommonDir(host)
 	assert.Nil(t, err)

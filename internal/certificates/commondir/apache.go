@@ -36,7 +36,8 @@ func (q *ApacheCommonDirQuery) GetCommonDirStatus(serverName string) CommonDir {
 	}
 
 	commonDir.Enabled = true
-	commonDir.Root = strings.Trim(commonDirAlias.GetToLocation(), " \"")
+	toLocation := strings.Trim(commonDirAlias.GetToLocation(), " \"")
+	commonDir.Root = strings.TrimSuffix(toLocation, apacheAcmeLocation)
 
 	return commonDir
 }
