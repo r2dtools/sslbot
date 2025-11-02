@@ -57,6 +57,10 @@ func mergeVhosts(vhosts []dto.VirtualHost) []dto.VirtualHost {
 				existedVhost.Aliases = com.AppendStr(existedVhost.Aliases, alias)
 			}
 
+			if existedVhost.Certificate == nil {
+				existedVhost.Certificate = vhost.Certificate
+			}
+
 			vhostsMap[vhost.ServerName] = existedVhost
 		} else {
 			vhostsMap[vhost.ServerName] = vhost

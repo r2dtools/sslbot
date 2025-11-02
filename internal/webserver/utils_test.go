@@ -10,6 +10,24 @@ import (
 )
 
 func TestMergeVHosts(t *testing.T) {
+	cert := &dto.Certificate{
+		CN:             "cn",
+		ValidFrom:      "from",
+		ValidTo:        "to",
+		DNSNames:       []string{"name"},
+		EmailAddresses: []string{},
+		Organization:   nil,
+		Province:       nil,
+		Country:        nil,
+		Locality:       nil,
+		IsCA:           false,
+		IsValid:        false,
+		Issuer: dto.Issuer{
+			CN:           "cn",
+			Organization: nil,
+		},
+	}
+
 	hosts := []dto.VirtualHost{
 		{
 			FilePath:   "/path",
@@ -50,6 +68,7 @@ func TestMergeVHosts(t *testing.T) {
 					Port:   "443",
 				},
 			},
+			Certificate: cert,
 		},
 	}
 
@@ -62,4 +81,5 @@ func TestMergeVHosts(t *testing.T) {
 	assert.Equal(t, "/var/www/html", mergedHost.DocRoot)
 	assert.Equal(t, "example.com", mergedHost.ServerName)
 	assert.Len(t, mergedHost.Addresses, 4)
+	assert.Equal(t, cert, mergedHost.Certificate)
 }
