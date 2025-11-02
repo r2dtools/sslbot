@@ -251,11 +251,11 @@ func (d *ApacheCertificateDeployer) ensureSslPortIsListened(port string) {
 	portsConfigFile := wConfig.GetConfigFile("ports.conf")
 
 	if slices.Contains(diffListens, port) {
-		block := portsConfigFile.AddBlock(string(goapacheconf.IfModule), []string{"mod_ssl.c"})
+		block := portsConfigFile.AddBlock(string(goapacheconf.IfModule), []string{"mod_ssl.c"}, false)
 		block.AddDirective(goapacheconf.ListenPort, []string{port}, false, false)
 	} else {
 		for _, listen := range diffListens {
-			block := portsConfigFile.AddBlock(string(goapacheconf.IfModule), []string{"mod_ssl.c"})
+			block := portsConfigFile.AddBlock(string(goapacheconf.IfModule), []string{"mod_ssl.c"}, false)
 			block.AddDirective(goapacheconf.ListenPort, []string{listen}, false, false)
 		}
 	}

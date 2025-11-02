@@ -44,10 +44,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/r2dtools/agentintegration v1.6.5 h1:Z2oq5mwEjWPzX9unfNC6cvxFO9+mu+qxvHb+K31b00I=
 github.com/r2dtools/agentintegration v1.6.5/go.mod h1:BMSDhqPdJUza0NkcV9a3AIeO7DCsEoMbwXUeyG68rmI=
-github.com/r2dtools/goapacheconf v1.0.11 h1:PpVrM47N7TUTiYFG1pTvtiaaEokR2LwZjoIf1ifhWaI=
-github.com/r2dtools/goapacheconf v1.0.11/go.mod h1:9RyC9IQdjYDMi7sS0AheXX3PgvZFnyOZ/QMRDt9lDNA=
-github.com/r2dtools/gonginxconf v1.2.3 h1:uO+/v99u9Te+jcpU6FwXM6yF5ERPSYL5pI2BPJ08n1w=
-github.com/r2dtools/gonginxconf v1.2.3/go.mod h1:LFavycbliq9TJHVl6n5piPHekiJdj+/aPwYenBlWPiE=
+github.com/r2dtools/goapacheconf v1.0.12 h1:svSDcS5wyN0hOR8cnoXr/H087aszXoqsmUf6rQuB508=
+github.com/r2dtools/goapacheconf v1.0.12/go.mod h1:9RyC9IQdjYDMi7sS0AheXX3PgvZFnyOZ/QMRDt9lDNA=
 github.com/r2dtools/gonginxconf v1.2.4 h1:11rzAVFv0lP9XRQq5egQLF/05AopcQqzuWOzakPYPbg=
 github.com/r2dtools/gonginxconf v1.2.4/go.mod h1:LFavycbliq9TJHVl6n5piPHekiJdj+/aPwYenBlWPiE=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=
