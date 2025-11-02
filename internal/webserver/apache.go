@@ -54,12 +54,15 @@ func (a *ApacheWebServer) GetVhosts() ([]dto.VirtualHost, error) {
 			DocRoot:     strings.Trim(aVhost.GetDocumentRoot(), "\""),
 			Aliases:     aVhost.GetServerAliases(),
 			Ssl:         aVhost.HasSSL(),
-			WebServer:   WebServerNginxCode,
+			WebServer:   WebServerApacheCode,
 			Addresses:   addresses,
 			Certificate: getApacheCertificate(aVhost),
 		}
 		vhosts = append(vhosts, vhost)
 	}
+
+	vhosts = filterVhosts(vhosts)
+	vhosts = mergeVhosts(vhosts)
 
 	return vhosts, nil
 }

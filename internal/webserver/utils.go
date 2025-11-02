@@ -1,6 +1,9 @@
 package webserver
 
 import (
+	"regexp"
+	"slices"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/unknwon/com"
 
@@ -11,7 +14,7 @@ func filterVhosts(vhosts []dto.VirtualHost) []dto.VirtualHost {
 	var fVhosts []dto.VirtualHost
 
 	for _, vhost := range vhosts {
-		if vhost.ServerName == "" || !checkVhostPorts(vhost.Addresses, []string{"80", "443"}) {
+		if !isValidDomain(vhost.ServerName) || !checkVhostPorts(vhost.Addresses, []string{"80", "443"}) {
 			continue
 		}
 
@@ -69,12 +72,18 @@ func mergeVhosts(vhosts []dto.VirtualHost) []dto.VirtualHost {
 
 func checkVhostPorts(addresses []dto.VirtualHostAddress, ports []string) bool {
 	for _, address := range addresses {
-		for _, port := range ports {
-			if port == address.Port {
-				return true
-			}
+		if slices.Contains(ports, address.Port) {
+			return true
 		}
 	}
 
 	return false
+}
+
+func isValidDomain(domain string) bool {
+	// Regular expression to validate domain name
+	regex := `^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`
+	match, _ := regexp.MatchString(regex, domain)
+
+	return match
 }
