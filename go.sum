@@ -50,6 +50,8 @@ github.com/r2dtools/goapacheconf v1.1.0 h1:luoSriaomsBfnQFCXjMBnL7LEg/HZ/UXHxMUA
 github.com/r2dtools/goapacheconf v1.1.0/go.mod h1:9RyC9IQdjYDMi7sS0AheXX3PgvZFnyOZ/QMRDt9lDNA=
 github.com/r2dtools/goapacheconf v1.1.1 h1:uFYFs6MYo9PWSAsvov0OoPYb42OO3uDo02dNiHHuw9s=
 github.com/r2dtools/goapacheconf v1.1.1/go.mod h1:9RyC9IQdjYDMi7sS0AheXX3PgvZFnyOZ/QMRDt9lDNA=
+github.com/r2dtools/goapacheconf v1.1.2 h1:DO1WY31u+Ll3kR095ca9JyWTKHB4W3I4do5hg3QRMPo=
+github.com/r2dtools/goapacheconf v1.1.2/go.mod h1:9RyC9IQdjYDMi7sS0AheXX3PgvZFnyOZ/QMRDt9lDNA=
 github.com/r2dtools/gonginxconf v1.2.4 h1:11rzAVFv0lP9XRQq5egQLF/05AopcQqzuWOzakPYPbg=
 github.com/r2dtools/gonginxconf v1.2.4/go.mod h1:LFavycbliq9TJHVl6n5piPHekiJdj+/aPwYenBlWPiE=
 github.com/rogpeppe/go-internal v1.12.0 h1:exVL4IDcn6na9z1rAb56Vxr+CgyK3nn3O+epU5NdKM8=

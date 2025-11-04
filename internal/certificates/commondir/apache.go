@@ -15,6 +15,7 @@ import (
 const (
 	apacheAcmeLocation      = "/.well-known/acme-challenge"
 	apacheAcmeLocationMatch = "^/.well-known/acme-challenge"
+	acmeProxyPass           = "/.well-known/acme-challenge !"
 )
 
 type ApacheCommonDirQuery struct {
@@ -114,6 +115,17 @@ func (c *ApacheCommonDirChangeCommand) EnableCommonDir(serverName string) error 
 		commonDirLocation = &location
 	}
 
+	rootProxyPassDirective := findRootProxyPassDirective(virtualHostBlock)
+
+	if rootProxyPassDirective != nil {
+		acmeProxyPassDirective := goapacheconf.NewDirective(goapacheconf.ProxyPass, []string{acmeProxyPass})
+		acmeProxyPassDirective.AppendNewLine()
+		acmeProxyPassDirective = virtualHostBlock.AppendDirective(acmeProxyPassDirective)
+
+		order := virtualHostBlock.GetDirectiveOrder(*rootProxyPassDirective)
+		virtualHostBlock.ChangeDirectiveOrder(acmeProxyPassDirective, order)
+	}
+
 	if err := c.reverter.BackupConfig(virtualHostBlock.FilePath); err != nil {
 		return err
 	}
@@ -184,6 +196,12 @@ func (c *ApacheCommonDirChangeCommand) DisableCommonDir(serverName string) error
 
 	if commonDirLocationMatch != nil {
 		virtualHostBlock.DeleteLocationMatchBlock(*commonDirLocationMatch)
+	}
+
+	acmeProxyPass := findAcmeProxyPassDirective(virtualHostBlock)
+
+	if acmeProxyPass != nil {
+		virtualHostBlock.DeleteDirective(*acmeProxyPass)
 	}
 
 	if err := c.reverter.BackupConfig(virtualHostBlock.FilePath); err != nil {
@@ -266,4 +284,32 @@ func findVirtualHostBlock(apacheConfig *goapacheconf.Config, serverName string) 
 	}
 
 	return nonSslVirtualHostBlock
+}
+
+func findRootProxyPassDirective(vHostBlock *goapacheconf.VirtualHostBlock) *goapacheconf.Directive {
+	directives := vHostBlock.FindDirectives(goapacheconf.ProxyPass)
+
+	for _, directive := range directives {
+		from := directive.GetFirstValue()
+
+		if from == "/" {
+			return &directive
+		}
+	}
+
+	return nil
+}
+
+func findAcmeProxyPassDirective(vHostBlock *goapacheconf.VirtualHostBlock) *goapacheconf.Directive {
+	directives := vHostBlock.FindDirectives(goapacheconf.ProxyPass)
+
+	for _, directive := range directives {
+		value := directive.GetValuesAsString()
+
+		if value == acmeProxyPass {
+			return &directive
+		}
+	}
+
+	return nil
 }

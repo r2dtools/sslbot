@@ -43,6 +43,9 @@ func TestApacheCommonDir(t *testing.T) {
 	require.Empty(t, locationBlocks)
 	require.Empty(t, locationMatchBlocks)
 
+	rootProxyPassDirective := findRootProxyPassDirective(&block)
+	require.NotNil(t, rootProxyPassDirective)
+
 	err = command.EnableCommonDir(host)
 	require.Nil(t, err)
 
@@ -83,6 +86,9 @@ func TestApacheCommonDir(t *testing.T) {
 		Options -FollowSymLinks
 		AllowOverride AuthConfig FileInfo Indexes Limit Options=Indexes,SymLinksIfOwnerMatch,MultiViews,ExecCGI,Includes,IncludesNOEXEC
 	</Directory>
+
+	ProxyPass /.well-known/acme-challenge !
+	ProxyPass / http://127.0.0.1:3001/ retry=0
 
 	#extension letsencrypt begin
 	#extension letsencrypt end

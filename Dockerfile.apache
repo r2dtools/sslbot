@@ -23,6 +23,6 @@ RUN go install ./...
 RUN ln -s /etc/apache2/sites-available/example.com.conf /etc/apache2/sites-enabled/example.com.conf
 RUN ln -s /etc/apache2/sites-available/example2.com.conf /etc/apache2/sites-enabled/example2.com.conf
 
-RUN a2enmod ssl
+RUN a2enmod ssl proxy proxy_http headers
 
 ENTRYPOINT ["/bin/sh", "./script/test_apache_cmd.sh"]
