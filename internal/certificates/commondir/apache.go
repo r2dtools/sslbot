@@ -95,14 +95,22 @@ func (c *ApacheCommonDirChangeCommand) EnableCommonDir(serverName string) error 
 	aliasTo := filepath.Join(c.commonDir, apacheAcmeLocation)
 	aliasTo = filepath.Clean(aliasTo)
 
-	virtualHostBlock.AddAliasDirective(apacheAcmeLocation, aliasTo, false)
+	aliasDirective := goapacheconf.NewAliasDirective(apacheAcmeLocation, aliasTo)
+	aliasDirective.AppendNewLine()
+	aliasDirective = virtualHostBlock.AppendAliasDirective(aliasDirective)
 	commonDirLocation := findAcmeCommonDirLocationBlock(virtualHostBlock)
 
 	if commonDirLocation == nil {
 		location := virtualHostBlock.AddLocationBlock(fmt.Sprintf("%s/", apacheAcmeLocation), false)
-		location.AddDirective("Order", []string{"Allow,Deny"}, false, false)
-		location.AddDirective("Allow", []string{"from", "all"}, false, false)
-		location.AddDirective("Satisfy", []string{"any"}, false, false)
+		directive := goapacheconf.NewDirective(goapacheconf.Order, []string{"Allow,Deny"})
+		location.AppendDirective(directive)
+
+		directive = goapacheconf.NewDirective(goapacheconf.Allow, []string{"from", "all"})
+		location.AppendDirective(directive)
+
+		directive = goapacheconf.NewDirective(goapacheconf.Satisfy, []string{"any"})
+		location.AppendDirective(directive)
+
 		commonDirLocation = &location
 	}
 

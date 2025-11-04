@@ -148,16 +148,18 @@ func (d *ApacheCertificateDeployer) createSslHost(
 	return nil, fmt.Errorf("config file already exists %s", filePath)
 }
 
-func (d *ApacheCertificateDeployer) createOrUpdateSingleDirective(block *goapacheconf.VirtualHostBlock, name goapacheconf.DirectiveName, value string) {
+func (d *ApacheCertificateDeployer) createOrUpdateSingleDirective(block *goapacheconf.VirtualHostBlock, name string, value string) {
 	directives := block.FindDirectives(name)
 
 	if len(directives) > 1 {
-		block.DeleteDirectiveByName(string(name))
+		block.DeleteDirectiveByName(name)
 		directives = nil
 	}
 
 	if len(directives) == 0 {
-		block.AddDirective(string(name), []string{value}, false, true)
+		directive := goapacheconf.NewDirective(string(name), []string{value})
+		directive.AppendNewLine()
+		block.AppendDirective(directive)
 	} else {
 		directive := directives[0]
 		directive.SetValue(value)
@@ -252,11 +254,13 @@ func (d *ApacheCertificateDeployer) ensureSslPortIsListened(port string) {
 
 	if slices.Contains(diffListens, port) {
 		block := portsConfigFile.AddBlock(string(goapacheconf.IfModule), []string{"mod_ssl.c"}, false)
-		block.AddDirective(goapacheconf.ListenPort, []string{port}, false, false)
+		directive := goapacheconf.NewDirective(goapacheconf.ListenPort, []string{port})
+		block.AppendDirective(directive)
 	} else {
 		for _, listen := range diffListens {
 			block := portsConfigFile.AddBlock(string(goapacheconf.IfModule), []string{"mod_ssl.c"}, false)
-			block.AddDirective(goapacheconf.ListenPort, []string{listen}, false, false)
+			directive := goapacheconf.NewDirective(goapacheconf.ListenPort, []string{listen})
+			block.AppendDirective(directive)
 		}
 	}
 
