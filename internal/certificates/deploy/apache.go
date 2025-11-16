@@ -75,7 +75,7 @@ func (d *ApacheCertificateDeployer) DeployCertificate(vhost *dto.VirtualHost, ce
 	d.createOrUpdateSingleDirective(sslVHostBlock, goapacheconf.SSLCertificateKeyFile, certKeyPath)
 	d.createOrUpdateSingleDirective(sslVHostBlock, goapacheconf.SSLCertificateFile, certPath)
 	d.ensureSslPortIsListened("443")
-	d.removeDangerousForSslRewriteRules(sslVHostBlock)
+	// d.removeDangerousForSslRewriteRules(sslVHostBlock)
 
 	sslServerBlockFileName := filepath.Base(sslVHostBlock.FilePath)
 	configFile := wConfig.GetConfigFile(sslServerBlockFileName)
