@@ -3,6 +3,7 @@ package webserver
 import (
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/unknwon/com"
@@ -89,5 +90,15 @@ func isValidDomain(domain string) bool {
 	regex := `^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$`
 	match, _ := regexp.MatchString(regex, domain)
 
-	return match
+	if !match {
+		return false
+	}
+
+	parts := strings.SplitN(domain, ".", 2)
+
+	if len(parts) != 2 {
+		return false
+	}
+
+	return !strings.Contains(parts[1], "local")
 }

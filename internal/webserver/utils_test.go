@@ -7,6 +7,7 @@ import (
 
 	"github.com/r2dtools/sslbot/internal/dto"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMergeVHosts(t *testing.T) {
@@ -82,4 +83,28 @@ func TestMergeVHosts(t *testing.T) {
 	assert.Equal(t, "example.com", mergedHost.ServerName)
 	assert.Len(t, mergedHost.Addresses, 4)
 	assert.Equal(t, cert, mergedHost.Certificate)
+}
+
+func TestIsValidaDomain(t *testing.T) {
+	items := []struct {
+		domain string
+		valid  bool
+	}{
+		{
+			domain: "example.com",
+			valid:  true,
+		},
+		{
+			domain: "example.localdomain",
+			valid:  false,
+		},
+		{
+			domain: "example.com.ru",
+			valid:  true,
+		},
+	}
+
+	for _, item := range items {
+		require.Equal(t, item.valid, isValidDomain(item.domain))
+	}
 }
