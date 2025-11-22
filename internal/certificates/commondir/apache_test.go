@@ -104,6 +104,15 @@ func TestApacheCommonDir(t *testing.T) {
 	require.Equal(t, expectedContent, content)
 }
 
+func TestApacheIsAcmeRewriteCondRegex(t *testing.T) {
+	_, _, apacheWebServer, _ := getApacheCommonDir(t)
+	vBlocks := apacheWebServer.Config.FindVirtualHostBlocksByServerName("example.com")
+	require.Len(t, vBlocks, 2)
+
+	vBlock := vBlocks[1]
+	require.True(t, isAcmeExcludeRewriteCond(vBlock))
+}
+
 func getApacheCommonDir(t *testing.T) (CommonDirChangeCommand, CommonDirQuery, webserver.ApacheWebServer, reverter.Reverter) {
 	config, err := config.GetConfig()
 	require.Nil(t, err)

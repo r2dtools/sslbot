@@ -16,6 +16,7 @@ const (
 	apacheAcmeLocation      = "/.well-known/acme-challenge"
 	apacheAcmeLocationMatch = "^/.well-known/acme-challenge"
 	acmeProxyPass           = "/.well-known/acme-challenge !"
+	rewriteCondRegex        = "^/\\.well\\-known/acme\\-challenge"
 )
 
 type ApacheCommonDirQuery struct {
@@ -278,6 +279,10 @@ func findVirtualHostBlock(apacheConfig *goapacheconf.Config, serverName string) 
 			}
 
 			if address.Port == "443" {
+				if isAcmeExcludeRewriteCond(vHostBlock) {
+					break
+				}
+
 				return &vHostBlock
 			}
 		}
@@ -312,4 +317,23 @@ func findAcmeProxyPassDirective(vHostBlock *goapacheconf.VirtualHostBlock) *goap
 	}
 
 	return nil
+}
+
+func isAcmeExcludeRewriteCond(vHostBlock goapacheconf.VirtualHostBlock) bool {
+	rcDirectives := vHostBlock.FindDirectives(goapacheconf.RewriteCond)
+
+	for _, rcDirective := range rcDirectives {
+		values := rcDirective.GetValues()
+
+		if len(values) != 2 {
+			continue
+		}
+
+		if strings.Contains(values[1], rewriteCondRegex) && strings.HasPrefix(values[1], "!") {
+			return true
+		}
+
+	}
+
+	return false
 }
