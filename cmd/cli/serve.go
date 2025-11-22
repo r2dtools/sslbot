@@ -21,6 +21,10 @@ var ServeCmd = &cobra.Command{
 			return err
 		}
 
+		if err := config.CreateConfigFileIfNotExists(conf); err != nil {
+			return err
+		}
+
 		logger, err := logger.NewLogger(conf)
 
 		if err != nil {
